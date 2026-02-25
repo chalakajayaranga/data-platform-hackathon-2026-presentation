@@ -49,7 +49,19 @@ __________________________________            _____________________
 
 Slide - 6
 
-<Empty for Now>
+Why Streamlit approach?
+Full control on chat UI
+Showing visual diagrams inside the chat UI seamlessly
+Ability to export queried data as csv
+Ability to enhance semantic views for any new schemas with relationships
+Maintain chat history
+Navigate between chats & continue
+
+By using Ploty:
+No need for moving to external visualization tools like PowerBI
+No more expert knowledge
+No extra cost
+
 
 Slide - 7
 
@@ -107,3 +119,22 @@ flowchart TD
     style GenBasic fill:#f3e5f5
     style Enhance fill:#f3e5f5
     style End fill:#e8f5e9
+
+Slide - 9
+
+Live Demo
+
+Slide - 10
+Business Impact
+
+Slide - 11
+Future works
+Add dynamic tables along with indexes for improve the performance
+Call openarena chains from streamlit app instead of using Cortext to integrate with powerful LLMs
+Integrated with Power BI to visualize the data in Power BI
+
+Slide - 12
+Challenges faced
+Our team members only had free license in PowerBi.Therefore couldn't able to integrate our streamlit app with PowerBi
+Since outside traffic is blocked in the app running on snowflake couldnt able to integrate with openareana chains.
+
