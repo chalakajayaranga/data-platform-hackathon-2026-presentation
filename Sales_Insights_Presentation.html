@@ -228,8 +228,9 @@
   .flow-box.blue .flow-icon { color: var(--blue); }
   .flow-box.purple .flow-icon { color: var(--purple); }
   .flow-box.green .flow-icon { color: var(--green); }
-  .flow-arrow { color: var(--cyan); flex-shrink: 0; display: flex; align-items: center; }
+  .flow-arrow { color: var(--cyan); flex-shrink: 0; display: flex; align-items: center; position: relative; }
   .flow-arrow svg { width: 20px; height: 20px; }
+  .flow-box { position: relative; transition: box-shadow .3s, border-color .3s; }
 
   /* ─── List ─────────────────────────────────────────────── */
   .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
@@ -414,6 +415,60 @@
     to   { top: calc(100% - 5px); }
   }
 
+  /* ─── Slide 3 & 5 flow animation (same as slide 8) ───────── */
+  [data-slide="3"] .flow-box.tracing,
+  [data-slide="5"] .flow-box.tracing {
+    box-shadow: 0 0 18px rgba(0,212,255,.3);
+  }
+  [data-slide="3"] .flow-box.tracing::before,
+  [data-slide="5"] .flow-box.tracing::before {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: conic-gradient(from var(--trace-a),
+      transparent 0%, transparent 55%,
+      rgba(0,212,255,.4) 66%, rgba(0,212,255,1) 73%,
+      #fff 76%, rgba(0,212,255,1) 79%,
+      rgba(0,212,255,.4) 86%, transparent 95%);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    z-index: 1;
+    pointer-events: none;
+    animation: trace-spin 1.4s linear;
+  }
+  [data-slide="3"] .flow-box.traced,
+  [data-slide="5"] .flow-box.traced {
+    box-shadow: 0 0 10px rgba(0,212,255,.15);
+    border-color: rgba(0,212,255,.4) !important;
+  }
+  [data-slide="3"] .flow-arrow,
+  [data-slide="5"] .flow-arrow { transition: color .2s; }
+  [data-slide="3"] .flow-arrow.tracing::before,
+  [data-slide="5"] .flow-arrow.tracing::before {
+    content: '';
+    position: absolute; top: 50%; left: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #00d4ff;
+    box-shadow: 0 0 10px rgba(0,212,255,.8), 0 0 20px rgba(0,212,255,.4);
+    animation: dot-right .5s linear forwards;
+    transform: translateY(-50%);
+  }
+  [data-slide="3"] .flow-arrow.tracing,
+  [data-slide="5"] .flow-arrow.tracing { color: rgba(0,212,255,.8); }
+  [data-slide="3"] .flow-arrow.traced,
+  [data-slide="5"] .flow-arrow.traced { color: rgba(0,212,255,.5); }
+  @keyframes dot-right {
+    from { left: -2px; }
+    to   { left: calc(100% - 5px); }
+  }
+
   /* ─── Slide 14 Thank You animation ───────────────────────── */
   [data-slide="14"] .ty-wrap { opacity: 0; }
   [data-slide="14"].active .ty-wrap { opacity: 1; }
@@ -508,7 +563,7 @@
 
         <!-- Flow diagram -->
         <div class="card" style="padding:20px 24px;margin-bottom:16px;">
-          <div class="flow-row">
+          <div class="flow-row" id="flow-row-3">
             <div class="flow-box cyan">
               <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
               AI Agent Chat
@@ -565,7 +620,7 @@
 
         <!-- Flow diagram -->
         <div class="card" style="padding:20px 24px;">
-          <div class="flow-row">
+          <div class="flow-row" id="flow-row-5">
             <div class="flow-box cyan">
               <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
               Streamlit Chat
@@ -1006,6 +1061,106 @@ function drawFlowConnections() {
 
 }
 
+var slide3FlowActive = false;
+var slide3FlowTimeout = null;
+
+function stopSlide3Flow() {
+  slide3FlowActive = false;
+  clearTimeout(slide3FlowTimeout);
+  var row = document.getElementById('flow-row-3');
+  if (!row) return;
+  row.querySelectorAll('.flow-box').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
+  row.querySelectorAll('.flow-arrow').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
+}
+
+function animateSlide3Flow() {
+  stopSlide3Flow();
+  slide3FlowActive = true;
+  var row = document.getElementById('flow-row-3');
+  if (!row) return;
+
+  var items = [];
+  Array.from(row.children).forEach(function(el) {
+    if (el.classList.contains('flow-box')) items.push({ el: el, type: 'node' });
+    else if (el.classList.contains('flow-arrow')) items.push({ el: el, type: 'arrow' });
+  });
+
+  var idx = 0;
+  function step() {
+    if (!slide3FlowActive) return;
+    if (idx >= items.length) {
+      slide3FlowTimeout = setTimeout(function() {
+        if (!slide3FlowActive) return;
+        items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
+        idx = 0;
+        slide3FlowTimeout = setTimeout(step, 300);
+      }, 2000);
+      return;
+    }
+    var it = items[idx];
+    it.el.classList.add('tracing');
+    var dur = it.type === 'node' ? 1400 : 500;
+    slide3FlowTimeout = setTimeout(function() {
+      if (!slide3FlowActive) return;
+      it.el.classList.remove('tracing');
+      it.el.classList.add('traced');
+      idx++;
+      step();
+    }, dur);
+  }
+  step();
+}
+
+var slide5FlowActive = false;
+var slide5FlowTimeout = null;
+
+function stopSlide5Flow() {
+  slide5FlowActive = false;
+  clearTimeout(slide5FlowTimeout);
+  var row = document.getElementById('flow-row-5');
+  if (!row) return;
+  row.querySelectorAll('.flow-box').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
+  row.querySelectorAll('.flow-arrow').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
+}
+
+function animateSlide5Flow() {
+  stopSlide5Flow();
+  slide5FlowActive = true;
+  var row = document.getElementById('flow-row-5');
+  if (!row) return;
+
+  var items = [];
+  Array.from(row.children).forEach(function(el) {
+    if (el.classList.contains('flow-box')) items.push({ el: el, type: 'node' });
+    else if (el.classList.contains('flow-arrow')) items.push({ el: el, type: 'arrow' });
+  });
+
+  var idx = 0;
+  function step() {
+    if (!slide5FlowActive) return;
+    if (idx >= items.length) {
+      slide5FlowTimeout = setTimeout(function() {
+        if (!slide5FlowActive) return;
+        items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
+        idx = 0;
+        slide5FlowTimeout = setTimeout(step, 300);
+      }, 2000);
+      return;
+    }
+    var it = items[idx];
+    it.el.classList.add('tracing');
+    var dur = it.type === 'node' ? 1400 : 500;
+    slide5FlowTimeout = setTimeout(function() {
+      if (!slide5FlowActive) return;
+      it.el.classList.remove('tracing');
+      it.el.classList.add('traced');
+      idx++;
+      step();
+    }, dur);
+  }
+  step();
+}
+
 var settingsFlowActive = false;
 var settingsFlowTimeout = null;
 
@@ -1062,6 +1217,10 @@ updateUI = function() {
   if (current === 7) setTimeout(drawFlowConnections, 500);
   if (current === 8) setTimeout(animateSettingsFlow, 600);
   else stopSettingsFlow();
+  if (current === 3) setTimeout(animateSlide3Flow, 600);
+  else stopSlide3Flow();
+  if (current === 5) setTimeout(animateSlide5Flow, 600);
+  else stopSlide5Flow();
 };
 window.addEventListener('resize', function() { if (current === 7) drawFlowConnections(); });
 
