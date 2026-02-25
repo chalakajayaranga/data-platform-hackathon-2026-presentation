@@ -413,6 +413,37 @@
     from { top: -2px; }
     to   { top: calc(100% - 5px); }
   }
+
+  /* ─── Slide 14 Thank You animation ───────────────────────── */
+  [data-slide="14"] .ty-wrap { opacity: 0; }
+  [data-slide="14"].active .ty-wrap { opacity: 1; }
+  [data-slide="14"].active .ty-title {
+    animation: thankYouIn .8s cubic-bezier(.34,1.56,.64,1) forwards;
+    opacity: 0;
+  }
+  [data-slide="14"].active .ty-divider {
+    animation: thankYouIn .6s ease .25s forwards;
+    opacity: 0;
+  }
+  [data-slide="14"].active .ty-sub {
+    animation: thankYouIn .6s ease .45s forwards;
+    opacity: 0;
+  }
+  [data-slide="14"].active .ty-snowflake {
+    animation: float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 16px rgba(0,212,255,.4));
+  }
+  [data-slide="14"].active .ty-title span {
+    animation: thankYouGlow 2.5s ease-in-out infinite .8s;
+  }
+  @keyframes thankYouIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes thankYouGlow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.03); opacity: .95; }
+  }
 </style>
 </head>
 <body>
@@ -425,7 +456,7 @@
 
     <!-- ═══ SLIDE 1 – HERO / TITLE ═══ -->
     <div class="slide active" data-slide="1">
-      <div class="s-num">01 / 12</div>
+      <div class="s-num">01 / 14</div>
       <span class="snowflake-hero">❄️</span>
       <h1 class="hero-title fade-up">Snow Mind</h1>
       <p class="slide-subtitle fade-up" style="font-size:1.3rem;">Conversational Revenue Intelligence</p>
@@ -441,7 +472,7 @@
 
     <!-- ═══ SLIDE 2 – THE CHALLENGE ═══ -->
     <div class="slide" data-slide="2">
-      <div class="s-num">02 / 12</div>
+      <div class="s-num">02 / 14</div>
       <div class="content-wide">
         <div class="slide-tag">The Challenge</div>
         <h2 class="slide-title">Transform how Reuters analysts work with <span>RUM</span></h2>
@@ -468,7 +499,7 @@
 
     <!-- ═══ SLIDE 3 – APPROACH 1: SNOWFLAKE AI AGENT ═══ -->
     <div class="slide" data-slide="3">
-      <div class="s-num">03 / 12</div>
+      <div class="s-num">03 / 14</div>
       <div class="content-wide">
         <div class="slide-tag">Approach 1</div>
         <h2 class="slide-title">Using <span>Snowflake AI Agent</span></h2>
@@ -512,7 +543,7 @@
 
     <!-- ═══ SLIDE 4 – AI AGENT SCREENSHOT ═══ -->
     <div class="slide" data-slide="4">
-      <div class="s-num">04 / 12</div>
+      <div class="s-num">04 / 14</div>
       <div class="content-wide">
         <div class="slide-tag">Approach 1 — Demo</div>
         <h2 class="slide-title">Snowflake <span>AI Agent</span> in Action</h2>
@@ -525,7 +556,7 @@
 
     <!-- ═══ SLIDE 5 – APPROACH 2: CUSTOM STREAMLIT APP ═══ -->
     <div class="slide" data-slide="5">
-      <div class="s-num">05 / 12</div>
+      <div class="s-num">05 / 14</div>
       <div class="content-wide">
         <div class="slide-tag">Approach 2</div>
         <h2 class="slide-title">Custom Chat Application using <span>Streamlit</span></h2>
@@ -561,7 +592,7 @@
 
     <!-- ═══ SLIDE 6 – WHY STREAMLIT ═══ -->
     <div class="slide" data-slide="6">
-      <div class="s-num">06 / 12</div>
+      <div class="s-num">06 / 14</div>
       <div class="content-wide">
         <div class="slide-tag">Approach 2</div>
         <h2 class="slide-title">Why <span>Streamlit</span> Approach?</h2>
@@ -593,7 +624,7 @@
 
     <!-- ═══ SLIDE 7 – CHAT FLOW DIAGRAM (SNAKE) ═══ -->
     <div class="slide" data-slide="7">
-      <div class="s-num">07 / 12</div>
+      <div class="s-num">07 / 14</div>
       <div style="width:100%;max-width:min(98vw,1200px);">
         <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
         <h2 class="slide-title" style="text-align:center;">Chat Flow — <span>Streamlit App in Action</span></h2>
@@ -605,7 +636,7 @@
             <div class="sf-row">
               <div class="sf-n tm" id="fc-start">User Opens App</div>
               <div class="sf-h"></div>
-              <div class="sf-n dec" id="fc-config">Config Complete?</div>
+              <div class="sf-n dec" id="fc-config">Configuration Set?</div>
               <div class="sf-h"></div>
               <span class="sf-lbl yes">Yes</span>
               <div class="sf-h"></div>
@@ -633,7 +664,7 @@
               <div class="sf-h"></div>
               <div class="sf-n ai">AI Generates<small>Streaming Answer</small></div>
               <div class="sf-h"></div>
-              <div class="sf-n dec" id="fc-needviz">Need Viz?</div>
+              <div class="sf-n dec" id="fc-needviz">Need Visualization?</div>
             </div>
 
             <div class="sf-turn"></div>
@@ -670,7 +701,7 @@
 
     <!-- ═══ SLIDE 8 – SETTINGS FLOW DIAGRAM (VERTICAL) ═══ -->
     <div class="slide" data-slide="8">
-      <div class="s-num">08 / 12</div>
+      <div class="s-num">08 / 14</div>
       <div style="width:100%;max-width:min(98vw,1200px);">
         <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
         <h2 class="slide-title" style="text-align:center;">Settings Flow — <span>Streamlit App in Action</span></h2>
@@ -696,7 +727,7 @@
 
     <!-- ═══ SLIDE 9 – LIVE DEMO ═══ -->
     <div class="slide" data-slide="9">
-      <div class="s-num">09 / 12</div>
+      <div class="s-num">09 / 14</div>
       <div class="content-wide">
         <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
         <h2 class="slide-title" style="text-align:center;">Live <span>Demo</span></h2>
@@ -707,7 +738,7 @@
 
     <!-- ═══ SLIDE 10 – BUSINESS IMPACT ═══ -->
     <div class="slide" data-slide="10">
-      <div class="s-num">10 / 12</div>
+      <div class="s-num">10 / 14</div>
       <div class="content-wide">
         <div class="slide-tag" style="justify-content:center;">Outcomes</div>
         <h2 class="slide-title" style="text-align:center;">Business <span>Impact</span></h2>
@@ -726,7 +757,7 @@
 
     <!-- ═══ SLIDE 11 – FUTURE WORKS ═══ -->
     <div class="slide" data-slide="11">
-      <div class="s-num">11 / 12</div>
+      <div class="s-num">11 / 14</div>
       <div class="content-wide">
         <div class="slide-tag" style="justify-content:center;">Roadmap</div>
         <h2 class="slide-title" style="text-align:center;">Future <span>Works</span></h2>
@@ -734,15 +765,15 @@
 
         <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
           <li>Add dynamic tables with indexes to improve query performance</li>
-          <li>Call OpenArena chains from Streamlit instead of Cortex to integrate with powerful LLMs</li>
-          <li>Integrate with Power BI to visualize data in Power BI</li>
+          <li>Call OpenArena chains from Streamlit instead of Cortex to integrate with customized LLMs for different use cases</li>
+          <li>Integrate with Power BI to visualize data</li>
         </ul>
       </div>
     </div>
 
     <!-- ═══ SLIDE 12 – CHALLENGES FACED ═══ -->
     <div class="slide" data-slide="12">
-      <div class="s-num">12 / 12</div>
+      <div class="s-num">12 / 14</div>
       <div class="content-wide">
         <div class="slide-tag" style="justify-content:center;">Learnings</div>
         <h2 class="slide-title" style="text-align:center;">Challenges <span>Faced</span></h2>
@@ -755,12 +786,34 @@
       </div>
     </div>
 
+    <!-- ═══ SLIDE 13 – LESSONS LEARNED ═══ -->
+    <div class="slide" data-slide="13">
+      <div class="s-num">13 / 14</div>
+      <div class="content-wide">
+        <div class="slide-tag" style="justify-content:center;">Learnings</div>
+        <h2 class="slide-title" style="text-align:center;">Lessons <span>Learned</span></h2>
+        <div class="divider" style="margin:8px auto 16px;"></div>
+        <p class="slide-subtitle" style="color:var(--muted);text-align:center;">Key takeaways from the hackathon</p>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 14 – THANK YOU ═══ -->
+    <div class="slide" data-slide="14">
+      <div class="s-num">14 / 14</div>
+      <div class="content-wide ty-wrap">
+        <span class="ty-snowflake" style="display:block;font-size:3rem;text-align:center;margin-bottom:12px;">❄️</span>
+        <h2 class="slide-title ty-title" style="text-align:center;font-size:2.2rem;">Thank <span>You!</span></h2>
+        <div class="divider ty-divider" style="margin:16px auto;"></div>
+        <p class="slide-subtitle ty-sub" style="color:var(--muted);text-align:center;">Snow Mind — Pagero Hackstreet Boys</p>
+      </div>
+    </div>
+
   </div><!-- /slide-area -->
 
   <div id="nav">
     <div class="nav-left">
       <span class="logo">❄️ Snow Mind</span>
-      <span class="slide-counter" id="slide-counter">1 / 12</span>
+      <span class="slide-counter" id="slide-counter">1 / 14</span>
     </div>
     <div class="nav-center" id="nav-dots"></div>
     <div class="nav-right">
@@ -771,7 +824,7 @@
 </div>
 
 <script>
-const TOTAL = 12;
+const TOTAL = 14;
 let current = 1;
 let isAnimating = false;
 

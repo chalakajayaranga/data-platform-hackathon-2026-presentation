@@ -138,3 +138,9 @@ Challenges faced
 Our team members only had free license in PowerBi.Therefore couldn't able to integrate our streamlit app with PowerBi
 Since outside traffic is blocked in the app running on snowflake couldnt able to integrate with openareana chains.
 
+Slide - 13
+Lessons Learned
+
+Slide - 14
+
+Thank You! 
