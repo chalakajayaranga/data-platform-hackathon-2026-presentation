@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Snow Mind – Conversational Revenue Intelligence | Pagero Hackstreet Boys</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080d1a;
+    --surface:   #0e1628;
+    --card:      #111d35;
+    --border:    #1e3158;
+    --cyan:      #00d4ff;
+    --blue:      #3b82f6;
+    --purple:    #8b5cf6;
+    --green:     #10b981;
+    --orange:    #f59e0b;
+    --red:       #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #8a9bba;
+    --white:     #ffffff;
+    --gradient:  linear-gradient(135deg, #00d4ff 0%, #3b82f6 50%, #8b5cf6 100%);
+    --glow:      0 0 20px rgba(0,212,255,.35);
+    --glow-blue: 0 0 20px rgba(59,130,246,.35);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ─── Presentation Shell ───────────────────────────────── */
+  #presentation {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+
+  /* ─── Slide Container ──────────────────────────────────── */
+  #slide-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 32px 40px;
+    opacity: 0;
+    pointer-events: none;
+    overflow-y: auto;
+    will-change: transform, opacity;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .slide.animating {
+    transition: transform .42s cubic-bezier(.4,0,.2,1), opacity .42s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ─── Background decorations ───────────────────────────── */
+  .slide::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,212,255,.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(139,92,246,.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(30,49,88,.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,49,88,.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Navigation Bar ───────────────────────────────────── */
+  #nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 32px;
+    background: rgba(14,22,40,.85);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  #nav .nav-left { display: flex; align-items: center; gap: 12px; }
+  #nav .logo { font-size: 1.1rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  #nav .slide-counter { font-size: .9rem; color: var(--muted); }
+
+  #nav .nav-center {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    max-width: 600px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); cursor: pointer;
+    transition: background .3s, transform .3s;
+    border: none;
+  }
+  .nav-dot.active { background: var(--cyan); transform: scale(1.4); box-shadow: var(--glow); }
+  .nav-dot:hover:not(.active) { background: var(--blue); }
+
+  #nav .nav-right { display: flex; gap: 10px; }
+  .nav-btn {
+    padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: .9rem; font-weight: 600;
+    transition: all .25s;
+  }
+  .nav-btn:hover { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--glow-blue); }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn.primary { background: var(--gradient); border: none; color: #fff; }
+  .nav-btn.primary:hover { opacity: .85; box-shadow: var(--glow); }
+
+  /* ─── Progress bar ─────────────────────────────────────── */
+  #progress {
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  #progress-fill {
+    height: 100%;
+    background: var(--gradient);
+    transition: width .4s ease;
+  }
+
+  /* ─── Typography ───────────────────────────────────────── */
+  .slide-tag {
+    font-size: .88rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .slide-tag::before { content: ''; display: block; width: 24px; height: 2px; background: var(--cyan); }
+
+  h1.hero-title {
+    font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+    font-weight: 800; line-height: 1.1;
+    background: var(--gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center; margin-bottom: 8px;
+  }
+  h2.slide-title {
+    font-size: clamp(1.8rem, 3.3vw, 2.7rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--white); margin-bottom: 6px;
+  }
+  h2.slide-title span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .slide-subtitle {
+    font-size: 1.1rem; color: var(--muted);
+    margin-bottom: 16px; text-align: center;
+  }
+  p { line-height: 1.7; color: var(--text); }
+
+  /* ─── Cards & Grids ────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 22px;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .card:hover { border-color: var(--cyan); box-shadow: var(--glow); }
+  .card.card-highlight { border-color: var(--cyan); box-shadow: var(--glow); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; }
+
+  /* ─── Badge ────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: .9rem; font-weight: 700;
+    background: rgba(0,212,255,.12); color: var(--cyan);
+    border: 1px solid rgba(0,212,255,.25);
+  }
+  .badge.purple { background: rgba(139,92,246,.12); color: var(--purple); border-color: rgba(139,92,246,.25); }
+  .badge.green { background: rgba(16,185,129,.12); color: var(--green); border-color: rgba(16,185,129,.25); }
+  .badge.orange { background: rgba(245,158,11,.12); color: var(--orange); border-color: rgba(245,158,11,.25); }
+  .badge.red { background: rgba(239,68,68,.12); color: var(--red); border-color: rgba(239,68,68,.25); }
+
+  /* ─── Flow / Architecture ─────────────────────────────── */
+  .flow-row {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; justify-content: center;
+    margin: 8px 0;
+  }
+  .flow-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: .95rem;
+    text-align: center;
+    min-width: 140px;
+    transition: border-color .3s;
+  }
+  .flow-box.cyan { border-color: rgba(0,212,255,.4); background: rgba(0,212,255,.06); }
+  .flow-box.blue { border-color: rgba(59,130,246,.4); background: rgba(59,130,246,.06); }
+  .flow-box.purple { border-color: rgba(139,92,246,.4); background: rgba(139,92,246,.06); }
+  .flow-box.green { border-color: rgba(16,185,129,.4); background: rgba(16,185,129,.06); }
+  .flow-box .flow-icon { width: 32px; height: 32px; margin: 0 auto 8px; display: block; }
+  .flow-box .flow-icon svg { width: 100%; height: 100%; }
+  .flow-box.cyan .flow-icon { color: var(--cyan); }
+  .flow-box.blue .flow-icon { color: var(--blue); }
+  .flow-box.purple .flow-icon { color: var(--purple); }
+  .flow-box.green .flow-icon { color: var(--green); }
+  .flow-arrow { color: var(--cyan); flex-shrink: 0; display: flex; align-items: center; }
+  .flow-arrow svg { width: 20px; height: 20px; }
+
+  /* ─── List ─────────────────────────────────────────────── */
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .check-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 1rem; color: var(--text);
+  }
+  .check-list li::before {
+    content: '✓'; color: var(--green); font-weight: 700;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .x-list li::before { content: '✗'; color: var(--red); }
+
+  .divider {
+    width: 80px; height: 3px; border-radius: 2px;
+    background: var(--gradient); margin: 8px auto 16px;
+  }
+
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  .snowflake-hero {
+    font-size: 4rem; line-height: 1;
+    filter: drop-shadow(0 0 24px rgba(0,212,255,.6));
+    animation: float 4s ease-in-out infinite;
+    display: block; text-align: center; margin-bottom: 8px;
+  }
+  .fade-up { opacity: 0; animation: fadeUp .6s ease forwards; }
+  .fade-up:nth-child(2) { animation-delay: .1s; }
+  .fade-up:nth-child(3) { animation-delay: .2s; }
+  .fade-up:nth-child(4) { animation-delay: .3s; }
+  .fade-up:nth-child(5) { animation-delay: .4s; }
+  .fade-up:nth-child(6) { animation-delay: .5s; }
+
+  .content-wide { width: 100%; max-width: min(95vw, 1200px); }
+  .content-narrow { width: 100%; max-width: min(90vw, 900px); }
+
+  .s-num {
+    position: absolute; top: 20px; right: 24px;
+    font-size: .88rem; color: var(--muted);
+    font-weight: 600; letter-spacing: .08em;
+  }
+
+  .slide::-webkit-scrollbar { width: 4px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 20px 24px 24px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    #nav .nav-center { display: none; }
+    h1.hero-title { font-size: 2.2rem; }
+    .flow-row { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+
+  #fs-btn {
+    position: fixed; top: 16px; right: 16px;
+    background: rgba(14,22,40,.8); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 6px 10px;
+    cursor: pointer; font-size: .85rem; z-index: 200;
+    backdrop-filter: blur(8px);
+    transition: color .2s, border-color .2s;
+  }
+  #fs-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+
+  /* ─── Snake Flowchart ─────────────────────────────────────── */
+  .sf-wrap { position: relative; width: 100%; }
+  .sf { width: 100%; }
+  .sf-row { display: flex; align-items: center; gap: 5px; padding: 0 28px 0 22px; }
+  .sf-row.rtl { flex-direction: row-reverse; }
+
+  .sf-n {
+    padding: 6px 10px; border-radius: 10px;
+    font-size: .78rem; font-weight: 600; text-align: center;
+    border: 1.5px solid var(--border); background: var(--card);
+    color: var(--text); line-height: 1.3;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .sf-n small { font-weight: 400; font-size: .7rem; color: var(--muted); display: block; }
+  .sf-n.tm  { border-radius: 50px; background: rgba(0,212,255,.08); border-color: rgba(0,212,255,.35); color: var(--cyan); }
+  .sf-n.dec { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.35); color: var(--orange); }
+  .sf-n.ai  { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.35); color: var(--purple); }
+  .sf-n.dat { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.35); color: var(--blue); }
+  .sf-n.viz { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.35); color: var(--green); }
+  .sf-n.ui  { background: rgba(0,212,255,.06); border-color: rgba(0,212,255,.3); color: var(--cyan); }
+  .sf-n.sec { background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.3); color: var(--red); }
+
+  .sf-h { flex: 1; min-width: 14px; display: flex; align-items: center; }
+  .sf-h::before { content: ''; flex: 1; height: 0; border-top: 1.5px solid var(--muted); }
+  .sf-h::after { content: ''; flex-shrink: 0; border-top: 3px solid transparent; border-bottom: 3px solid transparent; border-left: 5px solid var(--muted); }
+  .sf-row.rtl .sf-h { flex-direction: row-reverse; }
+  .sf-row.rtl .sf-h::after { border-left: none; border-right: 5px solid var(--muted); }
+
+  .sf-turn { height: 16px; }
+
+  .sf-lbl { font-size: .64rem; font-weight: 700; margin: 0 -1px; flex-shrink: 0; }
+  .sf-lbl.yes { color: var(--green); }
+  .sf-lbl.no  { color: var(--red); }
+
+  .sf-sub { display: flex; align-items: flex-start; gap: 6px; padding: 2px 4px 0; margin-top: -2px; }
+  .sf-sub-arm { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .sf-loop { font-size: .62rem; font-weight: 700; color: var(--cyan); }
+
+  .sf-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+
+  /* ─── Vertical Flowchart (simple linear) ─────────────────── */
+  .vflow { display: flex; flex-direction: column; align-items: center; }
+  .vflow-ar {
+    width: 0; height: 22px;
+    border-left: 1.5px solid var(--muted);
+    position: relative; flex-shrink: 0;
+  }
+  .vflow-ar::after {
+    content: ''; position: absolute;
+    bottom: -1px; left: -4px;
+    border-left: 3.5px solid transparent;
+    border-right: 3.5px solid transparent;
+    border-top: 5px solid var(--muted);
+  }
+  .vflow .sf-n {
+    padding: 10px 20px; font-size: .88rem;
+    min-width: 200px; white-space: normal; max-width: 280px;
+  }
+  .vflow .sf-n small { font-size: .76rem; }
+</style>
+</head>
+<body>
+
+<button id="fs-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶ Fullscreen</button>
+
+<div id="presentation">
+  <div id="progress"><div id="progress-fill"></div></div>
+  <div id="slide-area">
+
+    <!-- ═══ SLIDE 1 – HERO / TITLE ═══ -->
+    <div class="slide active" data-slide="1">
+      <div class="s-num">01 / 08</div>
+      <span class="snowflake-hero">☃️</span>
+      <h1 class="hero-title fade-up">Snow Mind</h1>
+      <p class="slide-subtitle fade-up" style="font-size:1.3rem;">Conversational Revenue Intelligence</p>
+      <div class="divider fade-up"></div>
+      <p class="fade-up" style="text-align:center;font-size:1.1rem;color:var(--muted);max-width:560px;">
+        Intelligent semantic layer on Snowflake — ask questions in natural language and get insights from your data.
+      </p>
+      <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;" class="fade-up">
+        <span class="badge">🏆 Data Platform Hackathon 2026</span>
+        <span class="badge purple">Pagero Hackstreet Boys</span>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 2 – THE CHALLENGE ═══ -->
+    <div class="slide" data-slide="2">
+      <div class="s-num">02 / 08</div>
+      <div class="content-wide">
+        <div class="slide-tag">The Challenge</div>
+        <h2 class="slide-title">Transform how Reuters analysts work with <span>RUM</span></h2>
+        <div class="divider" style="margin:8px 0 16px;"></div>
+        <div class="card" style="margin-bottom:16px;padding:20px 24px;">
+          <p style="font-size:1.15rem;line-height:1.75;color:var(--text);">
+            Build an <strong style="color:var(--cyan);">intelligent semantic layer</strong> on Snowflake that removes traditional query barriers. Create a <strong style="color:var(--cyan);">natural-language interface</strong> that lets analysts explore visual content performance, trends, and user engagement patterns through conversational questions—without needing complex SQL.
+          </p>
+        </div>
+        <div class="grid-2" style="gap:16px;">
+          <div class="card" style="padding:16px 20px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">🎯</div>
+            <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:6px;">Goal</h3>
+            <p style="font-size:1rem;color:var(--muted);">Reuters Unified Marketplace (RUM) enhanced data ecosystem — accessible to every analyst.</p>
+          </div>
+          <div class="card" style="padding:16px 20px;">
+            <div style="font-size:1.4rem;margin-bottom:8px;">💬</div>
+            <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:6px;">Experience</h3>
+            <p style="font-size:1rem;color:var(--muted);">Ask in plain language; get visual content performance, trends, and engagement insights instantly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 3 – APPROACH 1: SNOWFLAKE AI AGENT ═══ -->
+    <div class="slide" data-slide="3">
+      <div class="s-num">03 / 08</div>
+      <div class="content-wide">
+        <div class="slide-tag">Approach 1</div>
+        <h2 class="slide-title">Using <span>Snowflake AI Agent</span></h2>
+        <p class="slide-subtitle" style="margin-bottom:12px;">Semantic view + AI Agent so users can query data via natural language</p>
+        <div class="divider" style="margin:0 auto 16px;"></div>
+
+        <!-- Flow diagram -->
+        <div class="card" style="padding:20px 24px;margin-bottom:16px;">
+          <div class="flow-row">
+            <div class="flow-box cyan">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              AI Agent Chat
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box blue">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
+              Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box purple">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+              Summarize response<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box green">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+              Visualize response<br/><small style="color:var(--muted);font-size:.9rem;">AI Agent</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.25);padding:16px 20px;">
+          <h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:8px;">⚠️ Drawbacks</h3>
+          <ul class="check-list x-list" style="margin:0;">
+            <li>Semantic model has to be updated manually if the database structure changes</li>
+            <li>Less control on visualization of the response</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 4 – AI AGENT SCREENSHOT ═══ -->
+    <div class="slide" data-slide="4">
+      <div class="s-num">04 / 08</div>
+      <div class="content-wide">
+        <div class="slide-tag">Approach 1 — Demo</div>
+        <h2 class="slide-title">Snowflake <span>AI Agent</span> in Action</h2>
+        <div class="divider" style="margin:8px auto 16px;"></div>
+        <div class="card card-highlight" style="padding:12px;overflow:hidden;">
+          <img src="images/ai-agent.png" alt="AI Agent screenshot" style="width:100%;height:auto;display:block;border-radius:8px;"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 5 – APPROACH 2: CUSTOM STREAMLIT APP ═══ -->
+    <div class="slide" data-slide="5">
+      <div class="s-num">05 / 08</div>
+      <div class="content-wide">
+        <div class="slide-tag">Approach 2</div>
+        <h2 class="slide-title">Custom Chat Application using <span>Streamlit</span></h2>
+        <p class="slide-subtitle" style="margin-bottom:12px;">Streamlit UI with Plotly for full control over visualization</p>
+        <div class="divider" style="margin:0 auto 16px;"></div>
+
+        <!-- Flow diagram -->
+        <div class="card" style="padding:20px 24px;">
+          <div class="flow-row">
+            <div class="flow-box cyan">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+              Streamlit Chat
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box blue">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
+              Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box purple">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+              Summarize response<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
+            </div>
+            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+            <div class="flow-box green">
+              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+              Plot response<br/><small style="color:var(--muted);font-size:.9rem;">Plotly</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 6 – PLACEHOLDER ═══ -->
+    <div class="slide" data-slide="6">
+      <div class="s-num">06 / 08</div>
+      <div class="content-wide">
+        <div class="slide-tag">Coming Soon</div>
+        <h2 class="slide-title">More <span>Content</span></h2>
+        <div class="divider" style="margin:8px auto 16px;"></div>
+        <p class="slide-subtitle" style="color:var(--muted);">Empty for now</p>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 7 – CHAT FLOW DIAGRAM (SNAKE) ═══ -->
+    <div class="slide" data-slide="7">
+      <div class="s-num">07 / 08</div>
+      <div style="width:100%;max-width:min(98vw,1200px);">
+        <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
+        <h2 class="slide-title" style="text-align:center;">Chat Flow — <span>Streamlit App in Action</span></h2>
+        <div class="divider" style="margin:4px auto 10px;"></div>
+
+        <div class="sf-wrap">
+          <div class="sf">
+            <!-- ── ROW 1 (→) ── -->
+            <div class="sf-row">
+              <div class="sf-n tm" id="fc-start">User Opens App</div>
+              <div class="sf-h"></div>
+              <div class="sf-n dec" id="fc-config">Config Complete?</div>
+              <div class="sf-h"></div>
+              <span class="sf-lbl yes">Yes</span>
+              <div class="sf-h"></div>
+              <div class="sf-n ui" id="fc-query">Enter NL Query</div>
+              <div class="sf-h"></div>
+              <div class="sf-n ai">Cortex Analyst<small>NLP → SQL</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n dat" id="fc-exec">Execute SQL<small>on Snowflake</small></div>
+            </div>
+
+            <!-- Config No branch -->
+            <div class="sf-sub" id="sf-config-sub">
+              <div class="sf-sub-arm">
+                <span class="sf-lbl no">No ↓</span>
+                <div class="sf-n ui" style="font-size:.66rem;padding:4px 7px;">Select DB, Schema &amp; View</div>
+                <span class="sf-loop">↻ back</span>
+              </div>
+            </div>
+
+            <div class="sf-turn"></div>
+
+            <!-- ── ROW 2 (←) ── -->
+            <div class="sf-row rtl">
+              <div class="sf-n dat" id="fc-results">Get Query Results</div>
+              <div class="sf-h"></div>
+              <div class="sf-n ai">AI Generates<small>Streaming Answer</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n dec" id="fc-needviz">Need Viz?</div>
+            </div>
+
+            <div class="sf-turn"></div>
+
+            <!-- ── ROW 3 (→) ── -->
+            <div class="sf-row">
+              <div class="sf-n dat" id="fc-analyze">Analyze Data<small>DataFrame Schema</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n ai">AI Suggests<small>Chart Definitions</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n sec">Validate<small>Chart Security</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n viz">Render Plotly<small>Charts</small></div>
+              <div class="sf-h"></div>
+              <div class="sf-n viz" id="fc-display">Display Answer<small>to User</small></div>
+            </div>
+
+            <div class="sf-turn"></div>
+
+            <!-- ── ROW 4 (←) ── -->
+            <div class="sf-row rtl">
+              <div class="sf-n dec" id="fc-moreq">More Questions?</div>
+              <div class="sf-h"></div>
+              <span class="sf-lbl no">No</span>
+              <div class="sf-h"></div>
+              <div class="sf-n tm" id="fc-end">End</div>
+            </div>
+          </div>
+          <svg class="sf-svg"></svg>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 8 – SETTINGS FLOW DIAGRAM (VERTICAL) ═══ -->
+    <div class="slide" data-slide="8">
+      <div class="s-num">08 / 08</div>
+      <div style="width:100%;max-width:min(98vw,1200px);">
+        <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
+        <h2 class="slide-title" style="text-align:center;">Settings Flow — <span>Streamlit App in Action</span></h2>
+        <div class="divider" style="margin:4px auto 10px;"></div>
+
+        <div class="vflow">
+          <div class="sf-n tm">Settings Tab</div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n dat">Select Database<small>&amp; Schema</small></div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n ai">Generate Basic Semantic View<small>from Cortex Analytics &amp; Upload</small></div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n dat">Retrieve Table<small>Metadata</small></div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n ai">AI Enhances Semantic View<small>with Descriptions</small></div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n dat">Save Enhanced YAML<small>to Snowflake Stage</small></div>
+          <div class="vflow-ar"></div>
+          <div class="sf-n tm" style="border-color:rgba(16,185,129,.35);color:var(--green);background:rgba(16,185,129,.08);">Ready for Use</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slide-area -->
+
+  <div id="nav">
+    <div class="nav-left">
+      <span class="logo">☃️ Snow Mind</span>
+      <span class="slide-counter" id="slide-counter">1 / 7</span>
+    </div>
+    <div class="nav-center" id="nav-dots"></div>
+    <div class="nav-right">
+      <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+      <button class="nav-btn primary" id="next-btn" onclick="changeSlide(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOTAL = 8;
+let current = 1;
+let isAnimating = false;
+
+function goToSlide(n, direction) {
+  if (isAnimating || n === current || n < 1 || n > TOTAL) return;
+  isAnimating = true;
+
+  const from = document.querySelector('.slide.active');
+  const to   = document.querySelector(`[data-slide="${n}"]`);
+  const enterFrom = direction > 0 ? 'translateX(100%)' : 'translateX(-100%)';
+  const exitTo    = direction > 0 ? 'translateX(-100%)' : 'translateX(100%)';
+
+  // 1. Position incoming slide off-screen, make it visible, no transition yet
+  to.classList.remove('animating');
+  to.style.transform = enterFrom;
+  to.style.opacity = '1';
+  to.classList.add('active');
+
+  // 2. Ensure outgoing slide has no transition class yet
+  from.classList.remove('animating');
+  from.style.transform = 'translateX(0)';
+
+  // 3. Force browser to paint the starting positions
+  void to.offsetWidth;
+
+  // 4. Add transition class and animate both simultaneously
+  from.classList.add('animating');
+  to.classList.add('animating');
+  from.style.transform = exitTo;
+  from.style.opacity = '0';
+  to.style.transform = 'translateX(0)';
+
+  // 5. Clean up after animation
+  setTimeout(() => {
+    from.classList.remove('active', 'animating');
+    from.style.transform = '';
+    from.style.opacity = '';
+    to.classList.remove('animating');
+    to.style.transform = '';
+    current = n;
+    updateUI();
+    isAnimating = false;
+  }, 450);
+}
+
+function changeSlide(dir) { goToSlide(current + dir, dir); }
+
+function updateUI() {
+  document.getElementById('slide-counter').textContent = `${current} / ${TOTAL}`;
+  document.getElementById('progress-fill').style.width = `${(current / TOTAL) * 100}%`;
+  document.getElementById('prev-btn').disabled = current === 1;
+  document.getElementById('next-btn').disabled = current === TOTAL;
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i + 1 === current);
+  });
+}
+
+function buildDots() {
+  const c = document.getElementById('nav-dots');
+  for (let i = 1; i <= TOTAL; i++) {
+    const b = document.createElement('button');
+    b.className = 'nav-dot' + (i === 1 ? ' active' : '');
+    b.title = `Slide ${i}`;
+    b.onclick = () => goToSlide(i, i > current ? 1 : -1);
+    c.appendChild(b);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown','Space','PageDown'].includes(e.key)) { e.preventDefault(); changeSlide(1); }
+  if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); changeSlide(-1); }
+  if (e.key === 'Home') goToSlide(1, -1);
+  if (e.key === 'End')  goToSlide(TOTAL, 1);
+});
+
+let touchX = 0;
+document.getElementById('slide-area').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+document.getElementById('slide-area').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+});
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+buildDots();
+updateUI();
+
+function drawFlowConnections() {
+  var svg = document.querySelector('.sf-svg');
+  if (!svg) return;
+  var wrap = document.querySelector('.sf-wrap');
+  if (!wrap) return;
+  var wR = wrap.getBoundingClientRect();
+  svg.setAttribute('width', wR.width);
+  svg.setAttribute('height', wR.height);
+  svg.setAttribute('viewBox', '0 0 ' + wR.width + ' ' + wR.height);
+  svg.innerHTML = '';
+
+  function p(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    var r = el.getBoundingClientRect();
+    return { cx: r.left - wR.left + r.width/2, cy: r.top - wR.top + r.height/2,
+             t: r.top - wR.top, b: r.top - wR.top + r.height,
+             l: r.left - wR.left, r: r.left - wR.left + r.width };
+  }
+  function mkLine(d, color, dashed) {
+    var pe = document.createElementNS('http://www.w3.org/2000/svg','path');
+    pe.setAttribute('d', d); pe.setAttribute('fill','none');
+    pe.setAttribute('stroke', color); pe.setAttribute('stroke-width','1.5');
+    if (dashed) pe.setAttribute('stroke-dasharray','5 3');
+    svg.appendChild(pe);
+  }
+  function mkArrow(pts, color) {
+    var a = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    a.setAttribute('points', pts); a.setAttribute('fill', color); svg.appendChild(a);
+  }
+  function mkText(x, y, txt, color) {
+    var t = document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('fill', color);
+    t.setAttribute('font-size','10'); t.setAttribute('font-weight','700');
+    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
+    t.textContent = txt; svg.appendChild(t);
+  }
+
+  var cfg = p('fc-config');
+  var csub = document.getElementById('sf-config-sub');
+  if (cfg && csub) {
+    var arm = csub.querySelector('.sf-sub-arm');
+    if (arm) csub.style.paddingLeft = (cfg.cx - arm.offsetWidth/2 - 2) + 'px';
+  }
+
+  var exec = p('fc-exec');
+  var results = p('fc-results');
+  var nv = p('fc-needviz');
+  var analyze = p('fc-analyze');
+  var da = p('fc-display');
+  var mq = p('fc-moreq');
+  var eq = p('fc-query');
+
+  var mc = '#8a9bba';
+
+  if (exec && results) {
+    var midY = (exec.b + results.t) / 2;
+    mkLine('M'+exec.cx+' '+exec.b+' L'+exec.cx+' '+midY+' L'+results.cx+' '+midY+' L'+results.cx+' '+results.t, mc, false);
+    mkArrow((results.cx-3)+','+results.t+' '+(results.cx+3)+','+results.t+' '+results.cx+','+(results.t+5), mc);
+  }
+
+  if (nv && analyze) {
+    var midY = (nv.b + analyze.t) / 2;
+    mkLine('M'+nv.cx+' '+nv.b+' L'+nv.cx+' '+midY+' L'+analyze.cx+' '+midY+' L'+analyze.cx+' '+analyze.t, mc, false);
+    mkArrow((analyze.cx-3)+','+analyze.t+' '+(analyze.cx+3)+','+analyze.t+' '+analyze.cx+','+(analyze.t+5), mc);
+    mkText(Math.min(nv.cx, analyze.cx)-20, midY+4, 'Yes', '#10b981');
+  }
+
+  if (da && mq) {
+    var midY = (da.b + mq.t) / 2;
+    mkLine('M'+da.cx+' '+da.b+' L'+da.cx+' '+midY+' L'+mq.cx+' '+midY+' L'+mq.cx+' '+mq.t, mc, false);
+    mkArrow((mq.cx-3)+','+mq.t+' '+(mq.cx+3)+','+mq.t+' '+mq.cx+','+(mq.t+5), mc);
+  }
+
+  if (nv && da) {
+    var leftX = 8;
+    var byY = da.b + 10;
+    mkLine('M'+nv.l+' '+nv.cy+' L'+leftX+' '+nv.cy+' L'+leftX+' '+byY+' L'+da.cx+' '+byY+' L'+da.cx+' '+da.b, 'rgba(239,68,68,0.45)', true);
+    mkArrow((da.cx-3)+','+da.b+' '+(da.cx+3)+','+da.b+' '+da.cx+','+(da.b-5), 'rgba(239,68,68,0.6)');
+    mkText(leftX+2, nv.cy-6, 'No', 'rgba(239,68,68,0.7)');
+  }
+
+  if (mq && eq) {
+    var loopX = wR.width - 10;
+    mkLine('M'+mq.r+' '+mq.cy+' L'+loopX+' '+mq.cy+' L'+loopX+' '+eq.cy+' L'+eq.r+' '+eq.cy, 'rgba(16,185,129,0.45)', true);
+    mkArrow(eq.r+','+(eq.cy-3)+' '+eq.r+','+(eq.cy+3)+' '+(eq.r-5)+','+eq.cy, 'rgba(16,185,129,0.6)');
+    mkText(mq.r+5, mq.cy-6, 'Yes ↻', 'rgba(16,185,129,0.7)');
+  }
+
+}
+
+var _origUpdateUI = updateUI;
+updateUI = function() {
+  _origUpdateUI();
+  if (current === 7) setTimeout(drawFlowConnections, 500);
+};
+window.addEventListener('resize', function() { if (current === 7) drawFlowConnections(); });
+
+</script>
+</body>
+</html>

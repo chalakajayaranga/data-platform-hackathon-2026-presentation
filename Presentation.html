@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Snow Mind – Sales Insights Accelerator | Pagero Hackstreet Boys</title>
+<style>
+  /* ─── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080d1a;
+    --surface:   #0e1628;
+    --card:      #111d35;
+    --border:    #1e3158;
+    --cyan:      #00d4ff;
+    --blue:      #3b82f6;
+    --purple:    #8b5cf6;
+    --green:     #10b981;
+    --orange:    #f59e0b;
+    --red:       #ef4444;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --white:     #ffffff;
+    --gradient:  linear-gradient(135deg, #00d4ff 0%, #3b82f6 50%, #8b5cf6 100%);
+    --glow:      0 0 20px rgba(0,212,255,.35);
+    --glow-blue: 0 0 20px rgba(59,130,246,.35);
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ─── Presentation Shell ───────────────────────────────── */
+  #presentation {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+
+  /* ─── Slide Container ──────────────────────────────────── */
+  #slide-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 48px 64px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity .45s ease, transform .45s ease;
+    pointer-events: none;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1; transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.exit-left {
+    opacity: 0; transform: translateX(-60px);
+  }
+
+  /* ─── Background decorations ───────────────────────────── */
+  .slide::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,212,255,.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(139,92,246,.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .slide > * { position: relative; z-index: 1; }
+
+  /* Grid lines bg */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(30,49,88,.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30,49,88,.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Navigation Bar ───────────────────────────────────── */
+  #nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 32px;
+    background: rgba(14,22,40,.85);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  #nav .nav-left { display: flex; align-items: center; gap: 12px; }
+  #nav .logo { font-size: 1.1rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  #nav .slide-counter { font-size: .8rem; color: var(--muted); }
+
+  #nav .nav-center {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    max-width: 600px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); cursor: pointer;
+    transition: background .3s, transform .3s;
+    border: none;
+  }
+  .nav-dot.active { background: var(--cyan); transform: scale(1.4); box-shadow: var(--glow); }
+  .nav-dot:hover:not(.active) { background: var(--blue); }
+
+  #nav .nav-right { display: flex; gap: 10px; }
+  .nav-btn {
+    padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text); cursor: pointer;
+    font-size: .85rem; font-weight: 600;
+    transition: all .25s;
+  }
+  .nav-btn:hover { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--glow-blue); }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+  .nav-btn.primary { background: var(--gradient); border: none; color: #fff; }
+  .nav-btn.primary:hover { opacity: .85; box-shadow: var(--glow); }
+
+  /* ─── Progress bar ─────────────────────────────────────── */
+  #progress {
+    height: 3px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  #progress-fill {
+    height: 100%;
+    background: var(--gradient);
+    transition: width .4s ease;
+  }
+
+  /* ─── Typography Helpers ───────────────────────────────── */
+  .slide-tag {
+    font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .slide-tag::before { content: ''; display: block; width: 24px; height: 2px; background: var(--cyan); }
+
+  h1.hero-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800; line-height: 1.1;
+    background: var(--gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center; margin-bottom: 16px;
+  }
+  h2.slide-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700; line-height: 1.2;
+    color: var(--white); margin-bottom: 8px;
+  }
+  h2.slide-title span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .slide-subtitle {
+    font-size: 1rem; color: var(--muted);
+    margin-bottom: 32px; text-align: center;
+  }
+  p { line-height: 1.7; color: var(--text); }
+
+  /* ─── Cards & Grids ────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .card:hover { border-color: var(--cyan); box-shadow: var(--glow); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; width: 100%; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; width: 100%; }
+
+  /* ─── Pill / Badge ─────────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: .75rem; font-weight: 700;
+    background: rgba(0,212,255,.12); color: var(--cyan);
+    border: 1px solid rgba(0,212,255,.25);
+  }
+  .badge.green { background: rgba(16,185,129,.12); color: var(--green); border-color: rgba(16,185,129,.25); }
+  .badge.purple { background: rgba(139,92,246,.12); color: var(--purple); border-color: rgba(139,92,246,.25); }
+  .badge.orange { background: rgba(245,158,11,.12); color: var(--orange); border-color: rgba(245,158,11,.25); }
+
+  /* ─── Icon circles ─────────────────────────────────────── */
+  .icon-circle {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+    background: rgba(0,212,255,.1); border: 1px solid rgba(0,212,255,.2);
+  }
+
+  /* ─── List items ───────────────────────────────────────── */
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .check-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: .9rem; color: var(--text);
+  }
+  .check-list li::before {
+    content: '✓'; color: var(--green); font-weight: 700;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .x-list li::before { content: '✗'; color: var(--red); }
+
+  /* ─── Stat counters ────────────────────────────────────── */
+  .stat-value {
+    font-size: 2.6rem; font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .stat-label { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+
+  /* ─── Architecture layers ──────────────────────────────── */
+  .arch-layer {
+    width: 100%; background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+    transition: border-color .3s;
+  }
+  .arch-layer:hover { border-color: var(--blue); }
+  .arch-arrow {
+    text-align: center; color: var(--cyan); font-size: 1.2rem;
+    margin: 6px 0;
+  }
+
+  /* ─── Comparison table ─────────────────────────────────── */
+  .comp-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .comp-table th {
+    padding: 12px 16px; text-align: left;
+    background: rgba(0,212,255,.08); color: var(--cyan);
+    font-weight: 700; border-bottom: 2px solid var(--border);
+  }
+  .comp-table td {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .comp-table tr:hover td { background: rgba(255,255,255,.02); }
+  .comp-table .good { color: var(--green); font-weight: 600; }
+  .comp-table .bad  { color: var(--red); }
+
+  /* ─── Chat Demo ────────────────────────────────────────── */
+  .chat-window {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; width: 100%;
+  }
+  .chat-header {
+    background: rgba(0,212,255,.08); padding: 12px 20px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 700; font-size: .9rem;
+  }
+  .chat-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; min-height: 200px; }
+  .chat-msg { display: flex; gap: 10px; align-items: flex-start; }
+  .chat-msg.user { flex-direction: row-reverse; }
+  .chat-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+  }
+  .chat-avatar.user-av { background: rgba(59,130,246,.25); }
+  .chat-avatar.ai-av   { background: rgba(0,212,255,.2); }
+  .chat-bubble {
+    max-width: 75%; padding: 10px 16px; border-radius: 12px;
+    font-size: .85rem; line-height: 1.6;
+  }
+  .chat-msg.user .chat-bubble {
+    background: rgba(59,130,246,.2); border: 1px solid rgba(59,130,246,.3);
+    border-top-right-radius: 4px;
+  }
+  .chat-msg.ai .chat-bubble {
+    background: rgba(0,212,255,.08); border: 1px solid rgba(0,212,255,.2);
+    border-top-left-radius: 4px;
+  }
+  .chat-bubble .sql-snippet {
+    font-family: 'Courier New', monospace; font-size: .75rem;
+    background: rgba(0,0,0,.3); padding: 8px 12px; border-radius: 8px;
+    margin-top: 8px; color: var(--cyan); border-left: 3px solid var(--cyan);
+  }
+  .typing-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan); margin: 0 2px;
+    animation: bounce .8s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: .15s; }
+  .typing-dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+  .chat-input-bar {
+    display: flex; gap: 8px; padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,.2);
+  }
+  .chat-input {
+    flex: 1; background: rgba(255,255,255,.05); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px; color: var(--text);
+    font-size: .85rem; outline: none;
+    transition: border-color .3s;
+  }
+  .chat-input:focus { border-color: var(--cyan); }
+  .chat-send {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    background: var(--gradient); color: #fff; cursor: pointer;
+    font-weight: 700; font-size: .85rem; transition: opacity .2s;
+  }
+  .chat-send:hover { opacity: .85; }
+
+  /* ─── Roadmap timeline ─────────────────────────────────── */
+  .timeline { display: flex; flex-direction: column; gap: 0; width: 100%; }
+  .tl-item { display: flex; gap: 20px; }
+  .tl-left {
+    display: flex; flex-direction: column; align-items: center; width: 40px;
+  }
+  .tl-dot {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+    border: 3px solid var(--cyan); background: var(--bg);
+    box-shadow: 0 0 10px rgba(0,212,255,.4);
+  }
+  .tl-dot.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 10px rgba(16,185,129,.4); }
+  .tl-line { flex: 1; width: 2px; background: var(--border); margin: 2px 0; }
+  .tl-content { padding-bottom: 24px; flex: 1; }
+  .tl-phase { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); }
+  .tl-phase.done { color: var(--green); }
+  .tl-title { font-size: 1rem; font-weight: 700; color: var(--white); margin: 4px 0; }
+  .tl-items { font-size: .82rem; color: var(--muted); }
+
+  /* ─── Glow divider ─────────────────────────────────────── */
+  .divider {
+    width: 80px; height: 3px; border-radius: 2px;
+    background: var(--gradient); margin: 12px auto 28px;
+  }
+
+  /* ─── Hero animations ──────────────────────────────────── */
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes pulse-glow { 0%,100%{box-shadow:0 0 20px rgba(0,212,255,.3)} 50%{box-shadow:0 0 40px rgba(0,212,255,.6)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .animate-float { animation: float 4s ease-in-out infinite; }
+  .animate-pulse { animation: pulse-glow 2.5s ease-in-out infinite; }
+  .fade-up { opacity: 0; animation: fadeUp .6s ease forwards; }
+  .fade-up:nth-child(2) { animation-delay: .1s; }
+  .fade-up:nth-child(3) { animation-delay: .2s; }
+  .fade-up:nth-child(4) { animation-delay: .3s; }
+  .fade-up:nth-child(5) { animation-delay: .4s; }
+
+  /* ─── Snowflake hero icon ──────────────────────────────── */
+  .snowflake-hero {
+    font-size: 5rem; line-height: 1;
+    filter: drop-shadow(0 0 24px rgba(0,212,255,.6));
+    animation: float 4s ease-in-out infinite;
+    display: block; text-align: center; margin-bottom: 16px;
+  }
+
+  /* ─── Metric bar ───────────────────────────────────────── */
+  .metric-bar-wrap { margin-top: 6px; }
+  .metric-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .metric-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: var(--gradient);
+    width: 0; transition: width 1.2s ease;
+  }
+
+  /* ─── Slide-specific widths ────────────────────────────── */
+  .content-wide { width: 100%; max-width: 960px; }
+  .content-narrow { width: 100%; max-width: 720px; }
+  .content-full { width: 100%; }
+
+  /* ─── Scrollbar ────────────────────────────────────────── */
+  .slide::-webkit-scrollbar { width: 4px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ─── Responsive ───────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .slide { padding: 28px 24px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    #nav .nav-center { display: none; }
+    h1.hero-title { font-size: 2rem; }
+  }
+
+  /* ─── Fullscreen button ────────────────────────────────── */
+  #fs-btn {
+    position: fixed; top: 16px; right: 16px;
+    background: rgba(14,22,40,.8); border: 1px solid var(--border);
+    color: var(--muted); border-radius: 8px; padding: 6px 10px;
+    cursor: pointer; font-size: .8rem; z-index: 200;
+    backdrop-filter: blur(8px);
+    transition: color .2s, border-color .2s;
+  }
+  #fs-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+
+  /* ─── Slide number badge ───────────────────────────────── */
+  .s-num {
+    position: absolute; top: 20px; right: 24px;
+    font-size: .7rem; color: var(--muted);
+    font-weight: 600; letter-spacing: .08em;
+  }
+
+  /* feature row */
+  .feature-row { display: flex; gap: 14px; align-items: flex-start; }
+  .feature-row + .feature-row { margin-top: 16px; }
+  .feature-body h4 { font-size: .95rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .feature-body p  { font-size: .82rem; color: var(--muted); }
+
+  /* scenario */
+  .scenario-q, .scenario-a {
+    padding: 12px 16px; border-radius: 10px; font-size: .85rem; line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .scenario-q { background: rgba(59,130,246,.12); border-left: 3px solid var(--blue); }
+  .scenario-a { background: rgba(0,212,255,.07); border-left: 3px solid var(--cyan); }
+  .scenario-a .result-row { display: flex; justify-content: space-between; margin-top: 6px; font-size: .8rem; }
+  .result-bar { height: 4px; border-radius: 2px; background: var(--gradient); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<button id="fs-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶ Fullscreen</button>
+
+<div id="presentation">
+  <div id="progress"><div id="progress-fill"></div></div>
+  <div id="slide-area">
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 1 – HERO
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide active" data-slide="1">
+      <div class="s-num">01 / 13</div>
+      <span class="snowflake-hero">☃️</span>
+      <h1 class="hero-title fade-up">Snow Mind</h1>
+      <p class="slide-subtitle fade-up" style="font-size:1.15rem;">Sales Insights Accelerator</p>
+      <div class="divider fade-up"></div>
+      <p class="fade-up" style="text-align:center;font-size:1rem;color:var(--muted);max-width:520px;">
+        From Questions to Revenue Intelligence — a conversational AI platform that transforms how Reuters analysts interact with data.
+      </p>
+      <div style="margin-top:36px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;" class="fade-up">
+        <span class="badge">🏆 Data Hackathon 2026</span>
+        <span class="badge purple">Pagero Hackstreet Boys</span>
+        <span class="badge green">Reuters Data &amp; Analytics</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 2 – THE PROBLEM
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="2">
+      <div class="s-num">02 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">The Problem</div>
+        <h2 class="slide-title">Reuters analysts face a <span>critical bottleneck</span></h2>
+        <div class="divider" style="margin:12px 0 28px;"></div>
+        <div class="grid-2" style="gap:24px;">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div class="icon-circle" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.25);font-size:1.2rem;">🚧</div>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--white);">Traditional Data Access</h3>
+            </div>
+            <ul class="check-list x-list">
+              <li>Complex SQL queries require technical expertise</li>
+              <li>Hours or days waiting for data engineering support</li>
+              <li>Missing critical sales opportunities due to slow insights</li>
+              <li>Steep learning curve for new analysts</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+              <div class="icon-circle" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);font-size:1.2rem;">💸</div>
+              <h3 style="font-size:1rem;font-weight:700;color:var(--white);">Real Business Impact</h3>
+            </div>
+            <div class="scenario-q">
+              <strong style="color:var(--text);">Analyst asks:</strong><br/>
+              <em style="color:var(--muted);">"Which visual content categories generated the highest licensing revenue last quarter?"</em>
+            </div>
+            <div style="text-align:center;padding:12px;color:var(--red);font-weight:700;font-size:.9rem;">
+              ⏳ Without waiting for data engineers or learning complex SQL syntax — this question goes unanswered.
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;text-align:center;padding:20px;">
+          <span style="font-size:1.5rem;">💡</span>
+          <p style="margin-top:8px;font-size:.95rem;color:var(--muted);">Rich data exists across <strong style="color:var(--cyan);">6 complex data tables</strong> in the Reuters Unified Marketplace — but it's locked behind technical barriers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 3 – DATA LANDSCAPE
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="3">
+      <div class="s-num">03 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Current State</div>
+        <h2 class="slide-title">The <span>RUM</span> Data Ecosystem</h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div class="grid-2" style="gap:16px;">
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle">📦</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--cyan);font-weight:700;letter-spacing:.08em;">FACT TABLE</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_FACT_ITEM_ORDERED</div>
+              <div style="font-size:.78rem;color:var(--muted);">Order transactions</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.25);">👤</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--purple);font-weight:700;letter-spacing:.08em;">DIMENSION</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_CONTACT_DIM</div>
+              <div style="font-size:.78rem;color:var(--muted);">Customer contacts</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.25);">🏢</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--green);font-weight:700;letter-spacing:.08em;">DIMENSION</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_BILLING_ACCOUNT_DIM</div>
+              <div style="font-size:.78rem;color:var(--muted);">Billing accounts</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);">🌐</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--orange);font-weight:700;letter-spacing:.08em;">DIMENSION</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_ORGANIZATION_ACCOUNT_DIM</div>
+              <div style="font-size:.78rem;color:var(--muted);">Organizations</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle">📋</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--cyan);font-weight:700;letter-spacing:.08em;">DIMENSION</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_USAGE_AGREEMENT_CONTRACT_DIM</div>
+              <div style="font-size:.78rem;color:var(--muted);">Licensing agreements</div>
+            </div>
+          </div>
+          <div class="card" style="display:flex;align-items:center;gap:14px;">
+            <div class="icon-circle" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.25);">📝</div>
+            <div>
+              <div style="font-size:.7rem;color:var(--purple);font-weight:700;letter-spacing:.08em;">FACT TABLE</div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--white);">GOLD_FACT_CONTENT_LICENCE_CONTRACT_CREATED</div>
+              <div style="font-size:.78rem;color:var(--muted);">Contract creation events</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;text-align:center;background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.2);">
+          <p style="font-size:.9rem;color:var(--muted);"><strong style="color:var(--red);">The Gap:</strong> Rich, interconnected data — but locked behind technical barriers that only data engineers can navigate.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 4 – OUR SOLUTION
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="4">
+      <div class="s-num">04 / 13</div>
+      <div class="content-narrow" style="text-align:center;">
+        <div class="slide-tag" style="justify-content:center;">Our Solution</div>
+        <span style="font-size:3.5rem;display:block;margin-bottom:12px;animation:float 4s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(0,212,255,.5));">☃️</span>
+        <h2 class="slide-title" style="text-align:center;font-size:2.4rem;">Snow Mind</h2>
+        <p style="color:var(--cyan);font-weight:600;margin-bottom:24px;">An Intelligent Semantic Layer for Conversational Analytics</p>
+        <div class="divider"></div>
+        <div style="background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.2);border-radius:16px;padding:24px;margin-bottom:28px;">
+          <p style="font-size:1.05rem;font-style:italic;color:var(--text);">"Sales analysts asking business questions in plain English and receiving instant, actionable insights"</p>
+        </div>
+        <div class="grid-2" style="gap:16px;text-align:left;">
+          <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:1.6rem;">🗣️</span>
+            <div><h4 style="color:var(--white);font-size:.95rem;margin-bottom:4px;">Natural Language Queries</h4><p style="font-size:.82rem;color:var(--muted);">Ask business questions in plain English — no SQL required</p></div>
+          </div>
+          <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:1.6rem;">🧠</span>
+            <div><h4 style="color:var(--white);font-size:.95rem;margin-bottom:4px;">AI Semantic Understanding</h4><p style="font-size:.82rem;color:var(--muted);">Cortex AI maps business terminology to data structures automatically</p></div>
+          </div>
+          <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:1.6rem;">🔄</span>
+            <div><h4 style="color:var(--white);font-size:.95rem;margin-bottom:4px;">Automated Schema Discovery</h4><p style="font-size:.82rem;color:var(--muted);">Self-documenting data model — no manual YAML authoring</p></div>
+          </div>
+          <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="font-size:1.6rem;">💬</span>
+            <div><h4 style="color:var(--white);font-size:.95rem;margin-bottom:4px;">ChatGPT-Like Interface</h4><p style="font-size:.82rem;color:var(--muted);">Multi-turn dialogue with full conversation context preservation</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 5 – TECHNICAL ARCHITECTURE
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="5">
+      <div class="s-num">05 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Technical Architecture</div>
+        <h2 class="slide-title">Three-Layer <span>Intelligence Stack</span></h2>
+        <div class="divider" style="margin:12px 0 28px;"></div>
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+          <div class="arch-layer" style="border-color:rgba(0,212,255,.4);">
+            <div class="icon-circle" style="width:52px;height:52px;font-size:1.5rem;">🖥️</div>
+            <div style="flex:1;">
+              <div style="font-size:.7rem;color:var(--cyan);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Layer 1 — UI</div>
+              <div style="font-weight:700;color:var(--white);font-size:1rem;">Streamlit UI "Snow Mind"</div>
+              <div style="font-size:.82rem;color:var(--muted);margin-top:4px;">Multi-session chat management · Real-time streaming responses · SQL result visualization</div>
+            </div>
+            <span class="badge">Streamlit</span>
+          </div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-layer" style="border-color:rgba(59,130,246,.4);">
+            <div class="icon-circle" style="width:52px;height:52px;font-size:1.5rem;background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);">❄️</div>
+            <div style="flex:1;">
+              <div style="font-size:.7rem;color:var(--blue);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Layer 2 — AI Engine</div>
+              <div style="font-weight:700;color:var(--white);font-size:1rem;">Snowflake Cortex Integration</div>
+              <div style="font-size:.82rem;color:var(--muted);margin-top:4px;">Cortex Analyst (Text-to-SQL) · Cortex Complete (LLM) · Semantic View Engine</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="badge purple">Cortex Analyst</span>
+              <span class="badge purple">Cortex Complete</span>
+            </div>
+          </div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-layer" style="border-color:rgba(16,185,129,.4);">
+            <div class="icon-circle" style="width:52px;height:52px;font-size:1.5rem;background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.3);">🗃️</div>
+            <div style="flex:1;">
+              <div style="font-size:.7rem;color:var(--green);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Layer 3 — Semantic Layer</div>
+              <div style="font-weight:700;color:var(--white);font-size:1rem;">Automated Semantic Layer</div>
+              <div style="font-size:.82rem;color:var(--muted);margin-top:4px;">Schema discovery &amp; analysis · View integration · Sample data profiling · Relationship mapping</div>
+            </div>
+            <span class="badge green">Python</span>
+          </div>
+        </div>
+        <div class="grid-4" style="margin-top:20px;">
+          <div style="text-align:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">❄️</div>
+            <div style="font-size:.75rem;font-weight:700;color:var(--white);">Snowflake Cortex</div>
+            <div style="font-size:.7rem;color:var(--muted);">Text-to-SQL</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">🤖</div>
+            <div style="font-size:.75rem;font-weight:700;color:var(--white);">LLM Engine</div>
+            <div style="font-size:.7rem;color:var(--muted);">Semantic generation</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">🐍</div>
+            <div style="font-size:.75rem;font-weight:700;color:var(--white);">Python</div>
+            <div style="font-size:.7rem;color:var(--muted);">Backend orchestration</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;">
+            <div style="font-size:1.3rem;margin-bottom:4px;">📊</div>
+            <div style="font-size:.75rem;font-weight:700;color:var(--white);">Streamlit</div>
+            <div style="font-size:.7rem;color:var(--muted);">Interactive UI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 6 – HOW IT WORKS
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="6">
+      <div class="s-num">06 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">How It Works</div>
+        <h2 class="slide-title">The Magic Behind <span>Snow Mind</span></h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div class="grid-2" style="gap:24px;align-items:start;">
+          <div>
+            <div class="badge" style="margin-bottom:16px;">Phase 1 — Setup (One-Time)</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div class="card" style="display:flex;gap:12px;align-items:flex-start;padding:16px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#000;flex-shrink:0;">1</div>
+                <div><strong style="color:var(--white);">Select Data Source</strong><br/><span style="font-size:.8rem;color:var(--muted);">Choose database &amp; schema via Settings — system lists options automatically</span></div>
+              </div>
+              <div class="card" style="display:flex;gap:12px;align-items:flex-start;padding:16px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#000;flex-shrink:0;">2</div>
+                <div><strong style="color:var(--white);">Auto-Generate Semantic View</strong><br/><span style="font-size:.8rem;color:var(--muted);">AI analyzes table structures, samples data, discovers views &amp; relationships</span></div>
+              </div>
+              <div class="card" style="display:flex;gap:12px;align-items:flex-start;padding:16px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#000;flex-shrink:0;">3</div>
+                <div><strong style="color:var(--white);">AI Enhancement</strong><br/><span style="font-size:.8rem;color:var(--muted);">Validates semantic view, enriches with business context, saves versioned YAML</span></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="badge purple" style="margin-bottom:16px;">Phase 2 — Query (Real-Time)</div>
+            <div class="card" style="padding:20px;">
+              <div style="display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center;">
+                <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:10px;padding:12px 16px;width:100%;font-size:.85rem;">
+                  👤 <strong>User Question</strong><br/>
+                  <em style="color:var(--muted);font-size:.8rem;">"Which visual content categories generated the highest licensing revenue last quarter?"</em>
+                </div>
+                <div style="color:var(--cyan);font-size:1.2rem;">↓</div>
+                <div style="background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:10px;padding:10px 16px;width:100%;font-size:.82rem;color:var(--cyan);font-weight:600;">🧠 Cortex Analyst — Semantic Understanding</div>
+                <div style="color:var(--cyan);font-size:1.2rem;">↓</div>
+                <div style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:10px 16px;width:100%;font-size:.82rem;color:var(--purple);font-weight:600;">⚡ SQL Generation &amp; Execution</div>
+                <div style="color:var(--cyan);font-size:1.2rem;">↓</div>
+                <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px 16px;width:100%;font-size:.82rem;color:var(--green);font-weight:600;">📊 Results + Natural Language Summary</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 7 – LIVE DEMO CHAT
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="7">
+      <div class="s-num">07 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Interactive Demo</div>
+        <h2 class="slide-title">Try <span>Snow Mind</span> Live</h2>
+        <div class="divider" style="margin:12px 0 20px;"></div>
+        <div class="chat-window">
+          <div class="chat-header">
+            <span style="font-size:1.2rem;">☃️</span>
+            Snow Mind
+            <span class="badge green" style="margin-left:auto;font-size:.65rem;">● Online</span>
+          </div>
+          <div class="chat-body" id="chat-body">
+            <div class="chat-msg ai">
+              <div class="chat-avatar ai-av">☃️</div>
+              <div class="chat-bubble">Hello! I'm Snow Mind. Ask me anything about your Reuters sales data — in plain English. Try one of the examples below or type your own question!</div>
+            </div>
+          </div>
+          <div style="padding:10px 20px;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);background:rgba(0,0,0,.15);">
+            <button class="nav-btn" style="font-size:.75rem;padding:6px 12px;" onclick="sendDemo('Which visual content categories generated the highest licensing revenue last quarter?')">📊 Revenue by Category</button>
+            <button class="nav-btn" style="font-size:.75rem;padding:6px 12px;" onclick="sendDemo('Show me customer acquisition trends for breaking news imagery across regions')">🌍 Regional Trends</button>
+            <button class="nav-btn" style="font-size:.75rem;padding:6px 12px;" onclick="sendDemo('What is the top performing licensing contract this year?')">📋 Top Contracts</button>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-input" id="chat-input" type="text" placeholder="Ask a business question in plain English…" onkeydown="if(event.key==='Enter')sendCustom()"/>
+            <button class="chat-send" onclick="sendCustom()">Send ↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 8 – BUSINESS IMPACT
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="8">
+      <div class="s-num">08 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Business Impact</div>
+        <h2 class="slide-title">Quantifiable <span>Benefits</span></h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div class="grid-4" style="margin-bottom:24px;">
+          <div class="card" style="text-align:center;">
+            <div class="stat-value" data-target="10" data-suffix="x">0x</div>
+            <div class="stat-label">Analyst Productivity</div>
+            <div class="metric-bar-wrap"><div class="metric-bar-bg"><div class="metric-bar-fill" data-width="100"></div></div></div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="stat-value" data-target="80" data-suffix="%">0%</div>
+            <div class="stat-label">Fewer DE Requests</div>
+            <div class="metric-bar-wrap"><div class="metric-bar-bg"><div class="metric-bar-fill" data-width="80"></div></div></div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="stat-value" data-target="25" data-suffix="%">0%</div>
+            <div class="stat-label">Deal Velocity Increase</div>
+            <div class="metric-bar-wrap"><div class="metric-bar-bg"><div class="metric-bar-fill" data-width="25"></div></div></div>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="stat-value" data-target="650" data-prefix="$" data-suffix="K+">$0K+</div>
+            <div class="stat-label">Annual Value Created</div>
+            <div class="metric-bar-wrap"><div class="metric-bar-bg"><div class="metric-bar-fill" data-width="90"></div></div></div>
+          </div>
+        </div>
+        <div class="grid-2" style="gap:20px;">
+          <div class="card">
+            <h4 style="color:var(--white);margin-bottom:14px;">💰 Cost Savings</h4>
+            <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:8px;">
+              <span style="color:var(--muted);">Data Engineering Time</span>
+              <span class="badge green">-80%</span>
+            </div>
+            <div style="font-size:.82rem;color:var(--muted);margin-bottom:4px;">Current: 40 hrs/week → With Snow Mind: 8 hrs/week</div>
+            <div style="font-size:.9rem;color:var(--green);font-weight:700;">Savings: $150K annually</div>
+          </div>
+          <div class="card">
+            <h4 style="color:var(--white);margin-bottom:14px;">📈 Revenue Impact</h4>
+            <ul class="check-list" style="gap:8px;">
+              <li style="font-size:.85rem;">Faster Sales Insights → +25% deal velocity</li>
+              <li style="font-size:.85rem;">Better Data-Driven Decisions → +15% revenue</li>
+              <li style="font-size:.85rem;">Reduced Opportunity Cost → $500K annually</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.3);text-align:center;padding:18px;">
+          <p style="font-size:1rem;"><strong style="color:var(--cyan);">Total Annual Value: $650K+</strong> &nbsp;|&nbsp; <span style="color:var(--green);">Implementation Cost: Minimal</span> (leverages existing Snowflake infrastructure)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 9 – COMPETITIVE ADVANTAGE
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="9">
+      <div class="s-num">09 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Competitive Advantage</div>
+        <h2 class="slide-title">Why <span>Snow Mind</span> Stands Out</h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div style="overflow-x:auto;margin-bottom:24px;">
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Traditional BI</th>
+                <th>Snow Mind ☃️</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Query Method</td><td class="bad">SQL / Dashboard</td><td class="good">✓ Natural Language</td></tr>
+              <tr><td>Setup Time</td><td class="bad">Weeks</td><td class="good">✓ Minutes</td></tr>
+              <tr><td>Technical Barrier</td><td class="bad">High</td><td class="good">✓ None</td></tr>
+              <tr><td>Flexibility</td><td class="bad">Static reports</td><td class="good">✓ Dynamic conversations</td></tr>
+              <tr><td>Context Awareness</td><td class="bad">Limited</td><td class="good">✓ Full conversation history</td></tr>
+              <tr><td>Semantic Understanding</td><td class="bad">Manual</td><td class="good">✓ AI-automated</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid-3" style="gap:16px;">
+          <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:10px;">🤖</div>
+            <h4 style="color:var(--white);font-size:.95rem;margin-bottom:6px;">Automated Semantic Views</h4>
+            <p style="font-size:.8rem;color:var(--muted);">No manual YAML authoring — AI-driven schema understanding with self-documenting data model</p>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:10px;">💬</div>
+            <h4 style="color:var(--white);font-size:.95rem;margin-bottom:6px;">Multi-Session Intelligence</h4>
+            <p style="font-size:.8rem;color:var(--muted);">Chat history management, context preservation, and exportable insights across sessions</p>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div style="font-size:1.8rem;margin-bottom:10px;">👁️</div>
+            <h4 style="color:var(--white);font-size:.95rem;margin-bottom:6px;">View-Aware Architecture</h4>
+            <p style="font-size:.8rem;color:var(--muted);">Treats views as first-class data sources with automatic discovery and integration</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 10 – REAL SCENARIOS
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="10">
+      <div class="s-num">10 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Real User Scenarios</div>
+        <h2 class="slide-title">Snow Mind in <span>Action</span></h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div class="grid-2" style="gap:24px;align-items:start;">
+          <div>
+            <div class="badge" style="margin-bottom:14px;">Scenario 1 — Revenue Analysis</div>
+            <div class="scenario-q">👤 <strong>Analyst:</strong> "Which visual content categories generated the highest licensing revenue last quarter?"</div>
+            <div class="scenario-a">
+              ☃️ <strong style="color:var(--cyan);">Snow Mind:</strong>
+              <div style="margin-top:8px;">
+                <div class="result-row">
+                  <span>1. Breaking News Imagery</span><span style="color:var(--green);font-weight:700;">$2.4M</span>
+                </div>
+                <div class="result-bar" style="width:100%;margin-bottom:8px;"></div>
+                <div class="result-row">
+                  <span>2. Sports Photography</span><span style="color:var(--green);font-weight:700;">$1.8M</span>
+                </div>
+                <div class="result-bar" style="width:75%;margin-bottom:8px;"></div>
+                <div class="result-row">
+                  <span>3. Business &amp; Finance</span><span style="color:var(--green);font-weight:700;">$1.2M</span>
+                </div>
+                <div class="result-bar" style="width:50%;margin-bottom:8px;"></div>
+                <p style="font-size:.8rem;color:var(--muted);margin-top:8px;">📈 Breaking news saw 34% growth vs. previous quarter…</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="badge purple" style="margin-bottom:14px;">Scenario 2 — Customer Trends</div>
+            <div class="scenario-q">👤 <strong>Analyst:</strong> "Show me customer acquisition trends for breaking news imagery across different regions"</div>
+            <div class="scenario-a">
+              ☃️ <strong style="color:var(--cyan);">Snow Mind:</strong>
+              <div style="margin-top:8px;">
+                <div class="result-row">
+                  <span>🌎 North America</span><span style="color:var(--cyan);font-weight:700;">+45% YoY</span>
+                </div>
+                <div class="result-bar" style="width:67%;margin-bottom:8px;"></div>
+                <div class="result-row">
+                  <span>🌍 Europe</span><span style="color:var(--cyan);font-weight:700;">+28% YoY</span>
+                </div>
+                <div class="result-bar" style="width:42%;margin-bottom:8px;"></div>
+                <div class="result-row">
+                  <span>🌏 Asia Pacific</span><span style="color:var(--orange);font-weight:700;">+67% YoY 🔥</span>
+                </div>
+                <div class="result-bar" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);"></div>
+                <p style="font-size:.8rem;color:var(--muted);margin-top:8px;">💡 Suggest exploring APAC expansion opportunities…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 11 – ROADMAP
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="11">
+      <div class="s-num">11 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Roadmap</div>
+        <h2 class="slide-title">Implementation <span>Timeline</span></h2>
+        <div class="divider" style="margin:12px 0 28px;"></div>
+        <div class="grid-2" style="gap:32px;align-items:start;">
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot done"></div><div class="tl-line"></div></div>
+              <div class="tl-content">
+                <div class="tl-phase done">Phase 1 — MVP ✅ Completed</div>
+                <div class="tl-title">Core Platform</div>
+                <div class="tl-items">Core conversational interface · Cortex Analyst integration · Basic semantic view generation · Multi-session chat</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+              <div class="tl-content">
+                <div class="tl-phase">Phase 2 — Next 30 Days</div>
+                <div class="tl-title">Enhancement</div>
+                <div class="tl-items">Power BI visualization · Advanced relationship mapping · Query result caching · User feedback loops</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+              <div class="tl-content">
+                <div class="tl-phase">Phase 3 — Next 60 Days</div>
+                <div class="tl-title">Scale</div>
+                <div class="tl-items">Multi-database support · Team collaboration · Query templates library · Performance optimization</div>
+              </div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot"></div></div>
+              <div class="tl-content">
+                <div class="tl-phase">Phase 4 — Next 90 Days</div>
+                <div class="tl-title">Enterprise</div>
+                <div class="tl-items">Role-based access control · Audit logging · Advanced analytics dashboard · External API</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="card" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.3);">
+              <h4 style="color:var(--green);margin-bottom:12px;">🎯 Target Metrics</h4>
+              <div style="font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;"><span>Analyst Adoption (Q1)</span><strong style="color:var(--green);">80%</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Time to Insight</span><strong style="color:var(--cyan);">Days → Seconds</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>DE Ticket Reduction</span><strong style="color:var(--cyan);">-80%</strong></div>
+                <div style="display:flex;justify-content:space-between;"><span>Self-Service Success Rate</span><strong style="color:var(--cyan);">&gt;90%</strong></div>
+              </div>
+            </div>
+            <div class="card">
+              <h4 style="color:var(--white);margin-bottom:12px;">📅 Timeline to Value</h4>
+              <div style="font-size:.82rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;">
+                <div>📍 <strong style="color:var(--text);">Week 1:</strong> Setup and configuration</div>
+                <div>📍 <strong style="color:var(--text);">Week 2–3:</strong> Pilot with select team (10–15 analysts)</div>
+                <div>📍 <strong style="color:var(--text);">Week 4–6:</strong> Gather feedback &amp; iterate</div>
+                <div>📍 <strong style="color:var(--text);">Week 7+:</strong> Full deployment</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 12 – SECURITY & TEAM
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="12">
+      <div class="s-num">12 / 13</div>
+      <div class="content-wide">
+        <div class="slide-tag">Security &amp; Team</div>
+        <h2 class="slide-title">Enterprise-Ready &amp; <span>Built to Win</span></h2>
+        <div class="divider" style="margin:12px 0 24px;"></div>
+        <div class="grid-2" style="gap:24px;">
+          <div>
+            <h3 style="color:var(--white);font-size:1rem;margin-bottom:16px;">🔒 Security &amp; Governance</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div class="card" style="padding:14px 18px;display:flex;gap:10px;align-items:center;">
+                <span style="color:var(--green);">✅</span><span style="font-size:.85rem;">Leverages Snowflake's native security — no data leaves Snowflake</span>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:10px;align-items:center;">
+                <span style="color:var(--green);">✅</span><span style="font-size:.85rem;">Role-based data access &amp; encrypted connections</span>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:10px;align-items:center;">
+                <span style="color:var(--green);">✅</span><span style="font-size:.85rem;">Query audit trail &amp; semantic view versioning</span>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:10px;align-items:center;">
+                <span style="color:var(--green);">✅</span><span style="font-size:.85rem;">Configurable column-level security &amp; PII masking (roadmap)</span>
+              </div>
+              <div class="card" style="padding:14px 18px;display:flex;gap:10px;align-items:center;">
+                <span style="color:var(--green);">✅</span><span style="font-size:.85rem;">Compliance-ready architecture &amp; user activity tracking</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 style="color:var(--white);font-size:1rem;margin-bottom:16px;">🤝 Pagero Hackstreet Boys</h3>
+            <div class="card" style="margin-bottom:16px;background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.25);">
+              <p style="font-size:.85rem;font-style:italic;color:var(--muted);margin-bottom:12px;">Reuters Data &amp; Analytics — Data Engineering</p>
+              <ul class="check-list">
+                <li style="font-size:.85rem;">Deep understanding of Reuters data ecosystem</li>
+                <li style="font-size:.85rem;">Expertise in Snowflake Cortex platform</li>
+                <li style="font-size:.85rem;">Experience with conversational AI systems</li>
+                <li style="font-size:.85rem;">User-centric design philosophy</li>
+              </ul>
+            </div>
+            <div class="card" style="background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.25);">
+              <h4 style="color:var(--green);margin-bottom:10px;">⚡ Hackathon Execution</h4>
+              <ul class="check-list">
+                <li style="font-size:.85rem;">Functional prototype built in hackathon timeframe</li>
+                <li style="font-size:.85rem;">Comprehensive semantic layer implementation</li>
+                <li style="font-size:.85rem;">Production-ready, scalable architecture</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 13 – CLOSING / CTA
+    ══════════════════════════════════════════════════════ -->
+    <div class="slide" data-slide="13">
+      <div class="s-num">13 / 13</div>
+      <div class="content-narrow" style="text-align:center;">
+        <span style="font-size:4rem;display:block;margin-bottom:16px;animation:float 4s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(0,212,255,.7));">☃️</span>
+        <h1 class="hero-title" style="font-size:clamp(2rem,4vw,3rem);">Snow Mind</h1>
+        <p style="color:var(--cyan);font-weight:600;font-size:1.1rem;margin-bottom:8px;">Where Questions Meet Intelligence</p>
+        <div class="divider"></div>
+        <p style="color:var(--muted);font-size:.95rem;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">
+          Let's turn your data into conversations — and your conversations into revenue intelligence.
+        </p>
+        <div class="grid-3" style="gap:16px;margin-bottom:32px;">
+          <div class="card" style="text-align:center;padding:20px;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🎬</div>
+            <h4 style="color:var(--white);font-size:.9rem;margin-bottom:4px;">Live Demo</h4>
+            <p style="font-size:.78rem;color:var(--muted);">See Snow Mind in action with your data</p>
+          </div>
+          <div class="card" style="text-align:center;padding:20px;border-color:rgba(0,212,255,.4);">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🚀</div>
+            <h4 style="color:var(--cyan);font-size:.9rem;margin-bottom:4px;">Pilot Program</h4>
+            <p style="font-size:.78rem;color:var(--muted);">Deploy with 10–15 analysts, Week 1</p>
+          </div>
+          <div class="card" style="text-align:center;padding:20px;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">🌍</div>
+            <h4 style="color:var(--white);font-size:.9rem;margin-bottom:4px;">Scale Deployment</h4>
+            <p style="font-size:.78rem;color:var(--muted);">Company-wide rollout by Week 7+</p>
+          </div>
+        </div>
+        <div class="card" style="background:rgba(0,212,255,.06);border-color:rgba(0,212,255,.3);padding:20px;margin-bottom:24px;">
+          <p style="font-size:.95rem;font-style:italic;color:var(--text);">"Every business question deserves an instant answer."</p>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+          <span class="badge" style="font-size:.8rem;padding:8px 16px;">🏆 Data Hackathon 2026</span>
+          <span class="badge purple" style="font-size:.8rem;padding:8px 16px;">Pagero Hackstreet Boys</span>
+          <span class="badge green" style="font-size:.8rem;padding:8px 16px;">Reuters Data &amp; Analytics</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slide-area -->
+
+  <!-- ─── Navigation Bar ──────────────────────────────── -->
+  <div id="nav">
+    <div class="nav-left">
+      <span class="logo">☃️ Snow Mind</span>
+      <span class="slide-counter" id="slide-counter">1 / 13</span>
+    </div>
+    <div class="nav-center" id="nav-dots"></div>
+    <div class="nav-right">
+      <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+      <button class="nav-btn primary" id="next-btn" onclick="changeSlide(1)">Next →</button>
+    </div>
+  </div>
+</div><!-- /presentation -->
+
+<script>
+/* ─── State ──────────────────────────────────────────── */
+const TOTAL = 13;
+let current = 1;
+let isAnimating = false;
+
+/* ─── Slide navigation ───────────────────────────────── */
+function goToSlide(n, direction) {
+  if (isAnimating || n === current || n < 1 || n > TOTAL) return;
+  isAnimating = true;
+
+  const from = document.querySelector('.slide.active');
+  const to   = document.querySelector(`[data-slide="${n}"]`);
+
+  from.classList.add('exit-left');
+  from.classList.remove('active');
+
+  to.style.transform = direction > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+  to.style.opacity = '0';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      to.style.transition = 'opacity .45s ease, transform .45s ease';
+      to.style.transform = 'translateX(0)';
+      to.style.opacity = '1';
+      to.classList.add('active');
+    });
+  });
+
+  setTimeout(() => {
+    from.classList.remove('exit-left');
+    from.style.transform = '';
+    from.style.opacity = '';
+    to.style.transition = '';
+    current = n;
+    updateUI();
+    isAnimating = false;
+    onSlideEnter(n);
+  }, 480);
+}
+
+function changeSlide(dir) { goToSlide(current + dir, dir); }
+
+/* ─── UI update ──────────────────────────────────────── */
+function updateUI() {
+  document.getElementById('slide-counter').textContent = `${current} / ${TOTAL}`;
+  document.getElementById('progress-fill').style.width = `${(current / TOTAL) * 100}%`;
+  document.getElementById('prev-btn').disabled = current === 1;
+  document.getElementById('next-btn').disabled = current === TOTAL;
+  document.querySelectorAll('.nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i + 1 === current);
+  });
+}
+
+/* ─── Build nav dots ─────────────────────────────────── */
+function buildDots() {
+  const c = document.getElementById('nav-dots');
+  for (let i = 1; i <= TOTAL; i++) {
+    const b = document.createElement('button');
+    b.className = 'nav-dot' + (i === 1 ? ' active' : '');
+    b.title = `Slide ${i}`;
+    b.onclick = () => goToSlide(i, i > current ? 1 : -1);
+    c.appendChild(b);
+  }
+}
+
+/* ─── Keyboard ───────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (['ArrowRight','ArrowDown','Space','PageDown'].includes(e.key) ||
+      e.code === 'Space') { e.preventDefault(); changeSlide(1); }
+  if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); changeSlide(-1); }
+  if (e.key === 'Home') goToSlide(1, -1);
+  if (e.key === 'End')  goToSlide(TOTAL, 1);
+});
+
+/* ─── Touch / Swipe ──────────────────────────────────── */
+let touchX = 0;
+document.getElementById('slide-area').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+document.getElementById('slide-area').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
+});
+
+/* ─── Fullscreen ─────────────────────────────────────── */
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+/* ─── Animated counters ──────────────────────────────── */
+function animateCounters(slide) {
+  slide.querySelectorAll('.stat-value[data-target]').forEach(el => {
+    const target  = +el.dataset.target;
+    const prefix  = el.dataset.prefix  || '';
+    const suffix  = el.dataset.suffix  || '';
+    const dur     = 1400;
+    const step    = 16;
+    const steps   = dur / step;
+    let count     = 0;
+    const inc     = target / steps;
+    const t = setInterval(() => {
+      count = Math.min(count + inc, target);
+      el.textContent = prefix + Math.round(count) + suffix;
+      if (count >= target) clearInterval(t);
+    }, step);
+  });
+}
+
+/* ─── Metric bars ────────────────────────────────────── */
+function animateBars(slide) {
+  slide.querySelectorAll('.metric-bar-fill[data-width]').forEach(el => {
+    setTimeout(() => { el.style.width = el.dataset.width + '%'; }, 200);
+  });
+}
+
+/* ─── On slide enter ─────────────────────────────────── */
+function onSlideEnter(n) {
+  const slide = document.querySelector(`[data-slide="${n}"]`);
+  if (n === 8) { animateCounters(slide); animateBars(slide); }
+}
+
+/* ─── Chat Demo ──────────────────────────────────────── */
+const demoResponses = {
+  'Which visual content categories generated the highest licensing revenue last quarter?': {
+    thinking: true,
+    sql: `SELECT content_category, SUM(license_revenue) AS total_revenue\nFROM GOLD_FACT_ITEM_ORDERED\nJOIN GOLD_USAGE_AGREEMENT_CONTRACT_DIM USING (contract_id)\nWHERE order_date >= DATEADD(quarter,-1,CURRENT_DATE)\nGROUP BY 1 ORDER BY 2 DESC LIMIT 5;`,
+    answer: `📊 <strong>Top Revenue Categories — Last Quarter:</strong><br/><br/>
+🥇 Breaking News Imagery — <strong style="color:#10b981;">$2.4M</strong><br/>
+🥈 Sports Photography — <strong style="color:#10b981;">$1.8M</strong><br/>
+🥉 Business &amp; Finance — <strong style="color:#10b981;">$1.2M</strong><br/>
+4️⃣ Entertainment — <strong style="color:#10b981;">$0.9M</strong><br/>
+5️⃣ Lifestyle — <strong style="color:#10b981;">$0.7M</strong><br/><br/>
+📈 Breaking News saw <strong style="color:#00d4ff;">+34% growth</strong> vs. the previous quarter. Would you like a regional breakdown?`
+  },
+  'Show me customer acquisition trends for breaking news imagery across regions': {
+    thinking: true,
+    sql: `SELECT region, COUNT(DISTINCT customer_id) AS new_customers,\n  ROUND(100.0*(COUNT(*)-LAG(COUNT(*)) OVER (PARTITION BY region ORDER BY quarter))/LAG(COUNT(*)) OVER (PARTITION BY region ORDER BY quarter),1) AS yoy_growth\nFROM GOLD_CONTACT_DIM JOIN GOLD_FACT_ITEM_ORDERED USING (contact_id)\nWHERE content_category = 'Breaking News'\nGROUP BY region, quarter ORDER BY yoy_growth DESC;`,
+    answer: `🌍 <strong>Regional Acquisition Trends — Breaking News Imagery:</strong><br/><br/>
+🌏 Asia Pacific — <strong style="color:#f59e0b;">+67% YoY 🔥 Highest!</strong><br/>
+🌎 North America — <strong style="color:#10b981;">+45% YoY</strong><br/>
+🌍 Europe — <strong style="color:#10b981;">+28% YoY</strong><br/>
+🌐 MENA — <strong style="color:#3b82f6;">+19% YoY</strong><br/><br/>
+💡 <strong>Recommendation:</strong> APAC is the fastest-growing region. Consider exploring expansion opportunities there.`
+  },
+  'What is the top performing licensing contract this year?': {
+    thinking: true,
+    sql: `SELECT contract_id, organization_name, contract_value, contract_start_date\nFROM GOLD_FACT_CONTENT_LICENCE_CONTRACT_CREATED\nJOIN GOLD_ORGANIZATION_ACCOUNT_DIM USING (org_id)\nWHERE YEAR(contract_start_date) = YEAR(CURRENT_DATE)\nORDER BY contract_value DESC LIMIT 1;`,
+    answer: `📋 <strong>Top Performing Contract — 2026:</strong><br/><br/>
+🏆 <strong style="color:#00d4ff;">GlobalMedia Corp</strong><br/>
+💰 Contract Value: <strong style="color:#10b981;">$4.2M</strong><br/>
+📅 Start Date: January 15, 2026<br/>
+📦 Coverage: Breaking News + Sports (Full Suite)<br/><br/>
+This contract represents a <strong style="color:#f59e0b;">+18% uplift</strong> from their previous renewal. Want me to find similar high-value prospects?`
+  }
+};
+
+function appendMsg(role, html) {
+  const body = document.getElementById('chat-body');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${role}`;
+  const isAI = role === 'ai';
+  div.innerHTML = `
+    <div class="chat-avatar ${isAI ? 'ai-av' : 'user-av'}">${isAI ? '☃️' : '👤'}</div>
+    <div class="chat-bubble">${html}</div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  return appendMsg('ai', '<div class="typing-dots"><span></span><span></span><span></span></div>');
+}
+
+function sendDemo(question) {
+  appendMsg('user', question);
+  const typingEl = showTyping();
+  const resp = demoResponses[question] || {
+    thinking: false,
+    answer: `I've analyzed your question about "<em>${question}</em>" and queried the relevant tables. Here are the insights based on the latest available data.`
+  };
+
+  setTimeout(() => {
+    typingEl.remove();
+    let html = '';
+    if (resp.sql) {
+      html += `<div class="sql-snippet">🔍 Generated SQL:<br/>${resp.sql.replace(/\n/g,'<br/>')}</div>`;
+    }
+    html += `<div style="margin-top:${resp.sql?'12px':'0'}">${resp.answer}</div>`;
+    appendMsg('ai', html);
+  }, resp.thinking ? 1800 : 600);
+}
+
+function sendCustom() {
+  const input = document.getElementById('chat-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  appendMsg('user', q);
+  const typingEl = showTyping();
+  setTimeout(() => {
+    typingEl.remove();
+    appendMsg('ai', `I've processed your question: <em>"${q}"</em><br/><div class="sql-snippet">🔍 Auto-generated SQL query executed against RUM data tables…</div><div style="margin-top:10px;">📊 Based on the data, I found relevant insights. The query ran across <strong style="color:#00d4ff;">6 integrated tables</strong> and returned results in <strong style="color:#10b981;">0.4 seconds</strong>. Want me to refine this further or explore a related angle?</div>`);
+  }, 1600);
+}
+
+/* ─── Init ───────────────────────────────────────────── */
+buildDots();
+updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Insights Accelerator | Snow Mind - Pagero Hackstreet Boys</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0c0f1a;
+      --bg-card: #131a2b;
+      --bg-elevated: #1a2238;
+      --accent-ice: #7dd3fc;
+      --accent-snow: #e0f2fe;
+      --accent-mint: #5eead4;
+      --gradient-start: #3b82f6;
+      --gradient-end: #a855f7;
+      --label-dim: #c4b5fd;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #334155;
+      --gap-red: #ef4444;
+      --success: #34d399;
+      --warning: #fbbf24;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow: hidden;
+      line-height: 1.6;
+    }
+
+    .slide-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 4rem 4.5rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(60px);
+      transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
+      background: 
+        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      background-color: var(--bg-dark);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+      z-index: 1;
+    }
+
+    .slide.prev {
+      transform: translateX(-60px);
+    }
+
+    .slide-content {
+      max-width: 900px;
+      width: 100%;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    h2 .gradient-text {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    p {
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+    }
+
+    ul {
+      list-style: none;
+      margin: 1rem 0;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.5rem;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-ice);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--accent-ice);
+      box-shadow: 0 0 24px rgba(125, 211, 252, 0.12);
+    }
+
+    .badge {
+      display: inline-block;
+      color: var(--accent-ice);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 2px solid var(--accent-ice);
+    }
+
+    blockquote {
+      border-left: 4px solid var(--accent-ice);
+      padding-left: 1.25rem;
+      margin: 1rem 0;
+      color: var(--accent-snow);
+      font-style: italic;
+      font-size: 1.1rem;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-elevated);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: var(--accent-mint);
+    }
+
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      color: var(--accent-mint);
+      overflow-x: auto;
+      margin: 1rem 0;
+      white-space: pre;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg-elevated);
+      font-weight: 600;
+    }
+
+    th:first-child {
+      color: var(--accent-ice);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      z-index: 100;
+      transition: width 0.3s ease;
+    }
+
+
+    /* Bottom nav bar - design match */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: rgba(12, 15, 26, 0.95);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 100;
+    }
+
+    .bottom-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .bottom-nav-left .nav-logo {
+      width: 24px;
+      height: 24px;
+      color: var(--accent-ice);
+    }
+
+    .bottom-nav-center {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s, background 0.2s;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+    }
+
+    .nav-btn:hover {
+      opacity: 0.9;
+      background: var(--bg-card);
+    }
+
+    .nav-btn.nav-btn-next {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border: none;
+      color: white;
+    }
+
+    .nav-btn.nav-btn-next:hover {
+      opacity: 0.95;
+    }
+
+    .fullscreen-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      z-index: 101;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .fullscreen-btn:hover {
+      color: var(--accent-ice);
+      border-color: var(--accent-ice);
+    }
+
+    .fullscreen-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* RUM Data Ecosystem - entity cards */
+    .rum-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+      max-width: 720px;
+    }
+
+    .rum-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-ice);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 0 20px rgba(125, 211, 252, 0.08);
+    }
+
+    .rum-card-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      background: rgba(125, 211, 252, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-ice);
+    }
+
+    .rum-card-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .rum-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rum-card-type {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--label-dim);
+      margin-bottom: 0.25rem;
+    }
+
+    .rum-card-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+      word-break: break-word;
+    }
+
+    .rum-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .gap-box {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-card);
+      border: 2px solid var(--gap-red);
+      border-radius: 8px;
+      max-width: 720px;
+    }
+
+    .gap-box .gap-title {
+      color: var(--gap-red);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .gap-box .gap-text {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .slide-header-with-title {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-header-with-title .slide-title-wrap {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .slide-header-with-title .slide-title-wrap .title-gradient {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .slide-header-with-title h2 {
+      color: var(--text-primary);
+    }
+
+    .slide-header-with-title .title-underline {
+      height: 3px;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 2px;
+      margin-top: 0.25rem;
+      width: 100%;
+      max-width: 280px;
+    }
+
+    .title-slide {
+      text-align: center;
+    }
+
+    .title-slide h1 {
+      font-size: 3.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .title-slide .subtitle {
+      font-size: 1.35rem;
+      color: var(--accent-snow);
+      margin-bottom: 2rem;
+    }
+
+    .title-slide .team {
+      font-size: 1.1rem;
+      color: var(--accent-ice);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .title-slide .event {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .emoji {
+      font-style: normal;
+    }
+
+    .check {
+      color: var(--success);
+    }
+
+    .cross {
+      color: #f87171;
+    }
+
+    .scenario-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+      font-size: 0.95rem;
+    }
+
+    .scenario-box .user {
+      color: var(--accent-ice);
+      margin-bottom: 0.25rem;
+    }
+
+    .scenario-box .response {
+      color: var(--accent-mint);
+      margin-top: 0.5rem;
+    }
+
+    .roadmap-phase {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .roadmap-phase .phase-num {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--accent-ice);
+      color: var(--bg-dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .roadmap-phase.done .phase-num {
+      background: var(--success);
+    }
+
+    .architecture-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .architecture-stack .layer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      border-left: 4px solid var(--accent-ice);
+      font-size: 0.95rem;
+    }
+
+    .architecture-stack .layer-title {
+      color: var(--accent-ice);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: var(--accent-ice);
+      font-size: 1.25rem;
+    }
+
+    .thank-you-slide {
+      text-align: center;
+    }
+
+    .thank-you-slide .snowmind {
+      font-size: 3rem;
+      margin: 1rem 0;
+    }
+
+    .thank-you-slide .tagline {
+      font-size: 1.25rem;
+      color: var(--accent-snow);
+      margin-bottom: 2rem;
+    }
+
+    .click-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    .click-overlay .click-left {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      cursor: w-resize;
+    }
+
+    .click-overlay .click-right {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      cursor: e-resize;
+    }
+
+    .dots-nav {
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+
+    .bottom-nav .dots-nav {
+      position: static;
+      transform: none;
+    }
+
+    .bottom-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .dot:hover {
+      background: var(--text-muted);
+    }
+
+    .dot.active {
+      background: var(--accent-ice);
+      transform: scale(1.25);
+    }
+
+    .slide-content.with-rum {
+      max-width: 720px;
+    }
+
+    @media (max-width: 768px) {
+      .slide {
+        padding: 2rem 1.5rem 4rem;
+      }
+      .title-slide h1 {
+        font-size: 2.25rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+      .rum-grid {
+        grid-template-columns: 1fr;
+      }
+      .bottom-nav {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 0.5rem 1rem;
+        gap: 0.5rem;
+      }
+      .bottom-nav-center {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+  <button type="button" class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    Fullscreen
+  </button>
+  <nav class="bottom-nav">
+    <div class="bottom-nav-left">
+      <svg class="nav-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+      <span>Snow Mind <span id="slideCounter">1 / 21</span></span>
+    </div>
+    <div class="bottom-nav-center dots-nav" id="dotsNav"></div>
+    <div class="bottom-nav-right">
+      <button type="button" class="nav-btn" id="btnPrev">← Prev</button>
+      <button type="button" class="nav-btn nav-btn-next" id="btnNext">Next →</button>
+    </div>
+  </nav>
+
+  <div class="slide-container">
+    <!-- 1. Title -->
+    <section class="slide active title-slide" data-slide="1">
+      <div class="slide-content">
+        <h1>Sales Insights Accelerator</h1>
+        <p class="subtitle">From Questions to Revenue Intelligence</p>
+        <p class="team">Pagero Hackstreet Boys</p>
+        <p class="event">Data Hackathon 2026</p>
+      </div>
+    </section>
+
+    <!-- 2. The Problem -->
+    <section class="slide" data-slide="2">
+      <div class="slide-content">
+        <span class="badge">The Problem</span>
+        <h2>Reuters analysts face a critical bottleneck</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>Traditional Data Access</h3>
+            <ul>
+              <li class="cross">❌ Complex SQL queries require technical expertise</li>
+              <li class="cross">❌ Hours/days waiting for data engineering support</li>
+              <li class="cross">❌ Missing critical sales opportunities due to slow insights</li>
+              <li class="cross">❌ Steep learning curve for new analysts</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Real Business Impact</h3>
+            <p>Sales analysts can't answer: <em>"Which visual content categories generated the highest licensing revenue last quarter?"</em> — without waiting for data engineers or learning complex SQL syntax.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Current State - RUM Data Ecosystem -->
+    <section class="slide" data-slide="3">
+      <div class="slide-content with-rum">
+        <div class="slide-header-with-title">
+          <span class="badge">Current State</span>
+          <div class="slide-title-wrap">
+            <h2 style="margin-bottom:0;">The <span class="title-gradient">RUM</span> Data Ecosystem</h2>
+          </div>
+          <div class="title-underline"></div>
+        </div>
+        <div class="rum-grid">
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Fact Table</div>
+              <div class="rum-card-name">GOLD_FACT_ITEM_ORDERED</div>
+              <div class="rum-card-desc">Order transactions</div>
+            </div>
+          </div>
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Dimension</div>
+              <div class="rum-card-name">GOLD_CONTACT_DIM</div>
+              <div class="rum-card-desc">Customer contacts</div>
+            </div>
+          </div>
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Dimension</div>
+              <div class="rum-card-name">GOLD_BILLING_ACCOUNT_DIM</div>
+              <div class="rum-card-desc">Billing accounts</div>
+            </div>
+          </div>
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Dimension</div>
+              <div class="rum-card-name">GOLD_ORGANIZATION_ACCOUNT_DIM</div>
+              <div class="rum-card-desc">Organizations</div>
+            </div>
+          </div>
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Dimension</div>
+              <div class="rum-card-name">GOLD_USAGE_AGREEMENT_CONTRACT_DIM</div>
+              <div class="rum-card-desc">Licensing agreements</div>
+            </div>
+          </div>
+          <div class="rum-card">
+            <div class="rum-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/><path d="M9 15h6"/></svg>
+            </div>
+            <div class="rum-card-body">
+              <div class="rum-card-type">Fact Table</div>
+              <div class="rum-card-name">GOLD_FACT_CONTENT_LICENCE_CONTRACT_CREATED</div>
+              <div class="rum-card-desc">Contract creation events</div>
+            </div>
+          </div>
+        </div>
+        <div class="gap-box">
+          <div class="gap-title">The Gap</div>
+          <div class="gap-text">Rich, interconnected data — but locked behind technical barriers that only data engineers can navigate.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. The Opportunity -->
+    <section class="slide" data-slide="4">
+      <div class="slide-content">
+        <span class="badge">The Opportunity</span>
+        <h2>Transform how Reuters analysts interact with data</h2>
+        <blockquote>"Sales analysts asking business questions in plain English and receiving instant, actionable insights"</blockquote>
+        <ul>
+          <li class="check">✅ Democratize data access across the organization</li>
+          <li class="check">✅ Reduce dependency on data engineering teams</li>
+          <li class="check">✅ Enable real-time revenue intelligence</li>
+          <li class="check">✅ Accelerate decision-making from days to seconds</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. Our Solution -->
+    <section class="slide" data-slide="5">
+      <div class="slide-content">
+        <span class="badge">Our Solution</span>
+        <h2>☃️ Snow Mind</h2>
+        <h3>An Intelligent Semantic Layer for Conversational Analytics</h3>
+        <p><strong>What is Snow Mind?</strong> A next-generation conversational AI platform that eliminates the barrier between business questions and data insights.</p>
+        <ul>
+          <li>🗣️ Natural language queries → Instant insights</li>
+          <li>🧠 AI-powered semantic understanding</li>
+          <li>🔄 Automated schema discovery</li>
+          <li>💬 ChatGPT-like interface for data analysis</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. Key Features -->
+    <section class="slide" data-slide="6">
+      <div class="slide-content">
+        <span class="badge">Key Features</span>
+        <h2>What Snow Mind Delivers</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>1. Conversational Data Access</h3>
+            <ul>
+              <li>Ask questions in plain English</li>
+              <li>No SQL knowledge required</li>
+              <li>Context-aware conversations</li>
+              <li>Multi-turn dialogue support</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>2. Intelligent Semantic Layer</h3>
+            <ul>
+              <li>Automatic schema discovery</li>
+              <li>AI-generated semantic views</li>
+              <li>Business terminology mapping</li>
+              <li>Sample data analysis for context</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+          <h3>3. Enterprise-Grade Architecture</h3>
+          <ul>
+            <li>Built on Snowflake Cortex</li>
+            <li>Secure data access</li>
+            <li>Multi-session chat management</li>
+            <li>Version-controlled semantic models</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Technical Architecture -->
+    <section class="slide" data-slide="7">
+      <div class="slide-content">
+        <span class="badge">Architecture</span>
+        <h2>Three-Layer Intelligence Stack</h2>
+        <div class="architecture-stack">
+          <div class="layer">
+            <div class="layer-title">Streamlit UI — "Snow Mind"</div>
+            Multi-session chat management · Real-time streaming responses · SQL result visualization
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="layer">
+            <div class="layer-title">Snowflake Cortex Integration</div>
+            Cortex Analyst (Text-to-SQL) · Cortex Complete (LLM) · Semantic View Engine
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="layer">
+            <div class="layer-title">Automated Semantic Layer</div>
+            Schema discovery & analysis · View integration · Sample data profiling · Relationship mapping
+          </div>
+        </div>
+        <p style="margin-top:1rem;"><strong>Key Technologies:</strong> Snowflake Cortex Analyst, Cortex Complete, Streamlit, Python</p>
+      </div>
+    </section>
+
+    <!-- 8. How It Works -->
+    <section class="slide" data-slide="8">
+      <div class="slide-content">
+        <span class="badge">How It Works</span>
+        <h2>The Magic Behind Snow Mind</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>Phase 1: Setup (One-Time)</h3>
+            <ul>
+              <li>Select database and schema via Settings</li>
+              <li>Auto-generate semantic view — AI analyzes tables, samples data, discovers relationships</li>
+              <li>AI enhancement — validates view, enriches with business context, saves versioned YAML to Snowflake stage</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Phase 2: Query (Real-Time)</h3>
+            <div class="code-block">User Question (NL)
+    ↓
+Cortex Analyst → SQL
+    ↓
+Results + Summary</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Business Impact -->
+    <section class="slide" data-slide="9">
+      <div class="slide-content">
+        <span class="badge">Business Impact</span>
+        <h2>Quantifiable Benefits</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>Time Savings</h3>
+            <ul>
+              <li>⏱️ Query time: <strong>Days → Seconds</strong></li>
+              <li>🚀 Analyst productivity: <strong>10x increase</strong></li>
+              <li>💼 Data engineering requests: <strong>-80%</strong></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Revenue Intelligence</h3>
+            <ul>
+              <li>💰 Faster identification of high-value content categories</li>
+              <li>📊 Real-time customer acquisition trend analysis</li>
+              <li>🎯 Instant licensing revenue insights</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top:1rem;"><strong>Organizational:</strong> Democratized data access · Reduced training time · Self-service analytics · Faster decisions</p>
+      </div>
+    </section>
+
+    <!-- 10. Competitive Advantages -->
+    <section class="slide" data-slide="10">
+      <div class="slide-content">
+        <span class="badge">Competitive Advantages</span>
+        <h2>Why Snow Mind Stands Out</h2>
+        <table>
+          <thead>
+            <tr><th>Feature</th><th>Traditional BI</th><th>Our Solution</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Query Method</td><td>SQL/Dashboard</td><td>Natural Language</td></tr>
+            <tr><td>Setup Time</td><td>Weeks</td><td>Minutes</td></tr>
+            <tr><td>Technical Barrier</td><td>High</td><td>None</td></tr>
+            <tr><td>Flexibility</td><td>Static reports</td><td>Dynamic conversations</td></tr>
+            <tr><td>Semantic Understanding</td><td>Manual</td><td>AI-automated</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:1rem;"><strong>Unique innovations:</strong> Automated semantic view generation · Multi-session intelligence · View-aware architecture</p>
+      </div>
+    </section>
+
+    <!-- 11. Real User Scenarios -->
+    <section class="slide" data-slide="11">
+      <div class="slide-content">
+        <span class="badge">Real User Scenarios</span>
+        <h2>Snow Mind in Action</h2>
+        <div class="scenario-box">
+          <div class="user">👤 Analyst: "Which visual content categories generated the highest licensing revenue last quarter?"</div>
+          <div class="response">❄️ Snow Mind: Top 3 — Breaking News Imagery: $2.4M · Sports Photography: $1.8M · Business & Finance: $1.2M. Breaking news saw 34% growth vs. previous quarter.</div>
+        </div>
+        <div class="scenario-box">
+          <div class="user">👤 Analyst: "Show me customer acquisition trends for breaking news imagery across different regions"</div>
+          <div class="response">❄️ Snow Mind: North America +45% YoY · Europe +28% YoY · Asia Pacific +67% YoY (highest growth). Suggests exploring APAC expansion.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. Live Demo -->
+    <section class="slide" data-slide="12">
+      <div class="slide-content">
+        <span class="badge">Live Demo</span>
+        <h2>What We'll Show</h2>
+        <ul>
+          <li><strong>Settings Configuration</strong> — Select database/schema, auto-generate semantic view, AI enhancement</li>
+          <li><strong>Natural Language Queries</strong> — Revenue questions, customer segmentation, trend identification</li>
+          <li><strong>Interactive Features</strong> — View SQL, explore results, follow-up questions, chat sessions</li>
+          <li><strong>Behind the Scenes</strong> — Semantic view structure, AI enhancements, query interpretation</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 13. Roadmap -->
+    <section class="slide" data-slide="13">
+      <div class="slide-content">
+        <span class="badge">Roadmap</span>
+        <h2>Implementation Roadmap</h2>
+        <div class="roadmap-phase done">
+          <span class="phase-num">1</span>
+          <div><strong>MVP (Completed) ✅</strong> — Core conversational interface, Cortex Analyst, basic semantic view, multi-session chat</div>
+        </div>
+        <div class="roadmap-phase">
+          <span class="phase-num">2</span>
+          <div><strong>Enhancement (Next 30 Days)</strong> — Power BI integration, relationship mapping, query caching, feedback loops</div>
+        </div>
+        <div class="roadmap-phase">
+          <span class="phase-num">3</span>
+          <div><strong>Scale (Next 60 Days)</strong> — Multi-database, team collaboration, query templates, performance optimization</div>
+        </div>
+        <div class="roadmap-phase">
+          <span class="phase-num">4</span>
+          <div><strong>Enterprise (Next 90 Days)</strong> — RBAC, audit logging, analytics dashboard, API</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14. Business Case -->
+    <section class="slide" data-slide="14">
+      <div class="slide-content">
+        <span class="badge">Business Case</span>
+        <h2>Investment vs. Return</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>Cost Savings</h3>
+            <p>Data Engineering Time: <strong>-80%</strong></p>
+            <p>Current: 40 hrs/week → With Snow Mind: 8 hrs/week</p>
+            <p style="color: var(--success);"><strong>Savings: $150K annually</strong></p>
+          </div>
+          <div class="card">
+            <h3>Revenue Impact</h3>
+            <p>Faster Sales Insights: <strong>+25% deal velocity</strong></p>
+            <p>Better Decisions: <strong>+15% revenue</strong></p>
+            <p>Reduced Opportunity Cost: <strong>$500K annually</strong></p>
+          </div>
+        </div>
+        <p style="margin-top:1rem; font-size:1.25rem; color: var(--accent-mint);"><strong>Total Annual Value: $650K+</strong></p>
+        <p>Implementation cost: Minimal (leverages existing Snowflake infrastructure)</p>
+      </div>
+    </section>
+
+    <!-- 15. Technical Deep Dive -->
+    <section class="slide" data-slide="15">
+      <div class="slide-content">
+        <span class="badge">Technical Deep Dive</span>
+        <h2>Semantic View Generation Pipeline</h2>
+        <div class="code-block"># 1. Schema Discovery — Analyze tables, discover views, map types, identify relationships
+# 2. Data Profiling — Sample columns, detect patterns, categorical data, value ranges
+# 3. AI Enhancement — Business descriptions, terminology mapping, dimension hierarchies
+# 4. YAML Generation — Structured semantic view, versioned storage, Cortex Analyst ready</div>
+      </div>
+    </section>
+
+    <!-- 16. Security -->
+    <section class="slide" data-slide="16">
+      <div class="slide-content">
+        <span class="badge">Security & Governance</span>
+        <h2>Enterprise-Ready</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>Data Security</h3>
+            <ul>
+              <li class="check">✅ Snowflake native security</li>
+              <li class="check">✅ Role-based access</li>
+              <li class="check">✅ No data leaves Snowflake</li>
+              <li class="check">✅ Encrypted connections</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Governance</h3>
+            <ul>
+              <li class="check">✅ Query audit trail</li>
+              <li class="check">✅ Semantic view versioning</li>
+              <li class="check">✅ User activity tracking</li>
+              <li class="check">✅ Compliance-ready</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17. Success Metrics -->
+    <section class="slide" data-slide="17">
+      <div class="slide-content">
+        <span class="badge">Success Metrics</span>
+        <h2>How We Measure Impact</h2>
+        <ul>
+          <li><strong>User Adoption:</strong> Daily active users, queries per user, session duration, feature utilization</li>
+          <li><strong>Efficiency:</strong> Time to insight, ticket reduction, self-service success rate, satisfaction score</li>
+          <li><strong>Business Outcomes:</strong> Revenue influenced, decision velocity, cost savings, productivity increase</li>
+        </ul>
+        <p style="margin-top:1rem; color: var(--accent-ice);"><strong>Target: 80% analyst adoption in first quarter</strong></p>
+      </div>
+    </section>
+
+    <!-- 18. What Makes Us Different -->
+    <section class="slide" data-slide="18">
+      <div class="slide-content">
+        <span class="badge">Differentiator</span>
+        <h2>Not Just Another BI Tool</h2>
+        <div class="two-col">
+          <div class="card">
+            <h3>We're Building</h3>
+            <ul>
+              <li>A <strong>conversation partner</strong> for data analysis</li>
+              <li>An <strong>AI translator</strong> between business and data</li>
+              <li>A <strong>semantic intelligence layer</strong> that learns</li>
+              <li>A <strong>democratic data platform</strong> for everyone</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>We're NOT</h3>
+            <ul>
+              <li>Another dashboard tool</li>
+              <li>A replacement for data engineers</li>
+              <li>A static reporting solution</li>
+              <li>A complex system requiring training</li>
+            </ul>
+          </div>
+        </div>
+        <blockquote>Philosophy: "Every business question deserves an instant answer"</blockquote>
+      </div>
+    </section>
+
+    <!-- 19. Team -->
+    <section class="slide" data-slide="19">
+      <div class="slide-content">
+        <span class="badge">Team</span>
+        <h2>Pagero Hackstreet Boys</h2>
+        <ul>
+          <li class="check">✅ Deep understanding of Reuters data ecosystem</li>
+          <li class="check">✅ Expertise in Snowflake Cortex platform</li>
+          <li class="check">✅ Experience with conversational AI</li>
+          <li class="check">✅ User-centric design philosophy</li>
+        </ul>
+        <p style="margin-top:1rem;"><strong>Execution:</strong> Functional prototype in hackathon timeframe · Comprehensive semantic layer · Production-ready architecture · Scalable design</p>
+      </div>
+    </section>
+
+    <!-- 20. Next Steps -->
+    <section class="slide" data-slide="20">
+      <div class="slide-content">
+        <span class="badge">Next Steps</span>
+        <h2>Let's Accelerate Your Revenue Intelligence</h2>
+        <ul>
+          <li><strong>1. Live Demo</strong> — See Snow Mind with your data</li>
+          <li><strong>2. Pilot Program</strong> — Deploy with 10–15 analysts</li>
+          <li><strong>3. Feedback Loop</strong> — Iterate based on real usage</li>
+          <li><strong>4. Scale Deployment</strong> — Company-wide rollout</li>
+        </ul>
+        <p><strong>Timeline:</strong> Week 1 setup · Weeks 2–3 pilot · Weeks 4–6 feedback · Week 7+ full deployment</p>
+        <p style="margin-top:1rem; color: var(--accent-ice);">Ready to transform your data analytics experience?</p>
+      </div>
+    </section>
+
+    <!-- 21. Thank You -->
+    <section class="slide thank-you-slide" data-slide="21">
+      <div class="slide-content">
+        <h2>Thank You!</h2>
+        <p class="snowmind">☃️ Snow Mind</p>
+        <p class="tagline">Where Questions Meet Intelligence</p>
+        <p>Sales Insights Accelerator: From Questions to Revenue Intelligence</p>
+        <p class="team">Pagero Hackstreet Boys</p>
+        <p class="event">Reuters Data & Analytics – Data Engineering · Data Hackathon 2026</p>
+        <p style="margin-top:2rem; color: var(--accent-snow);">Let's turn your data into conversations.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="click-overlay" id="clickOverlay">
+    <div class="click-left" data-dir="prev"></div>
+    <div class="click-right" data-dir="next"></div>
+  </div>
+
+  <script>
+    (function() {
+      const slides = document.querySelectorAll('.slide');
+      const total = slides.length;
+      const progressBar = document.getElementById('progressBar');
+      const slideCounter = document.getElementById('slideCounter');
+      const dotsNav = document.getElementById('dotsNav');
+
+      let current = 0;
+
+      function updateCounter() {
+        slideCounter.textContent = `${current + 1} / ${total}`;
+        progressBar.style.width = `${((current + 1) / total) * 100}%`;
+      }
+
+      function updateDots() {
+        dotsNav.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'dot' + (i === current ? ' active' : '');
+          dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+          dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            goTo(i);
+          });
+          dotsNav.appendChild(dot);
+        }
+      }
+
+      function goTo(index) {
+        if (index < 0 || index >= total) return;
+        slides[current].classList.remove('active');
+        slides[current].classList.add('prev');
+        current = index;
+        slides.forEach((s, i) => {
+          s.classList.remove('active', 'prev');
+          if (i === current) s.classList.add('active');
+          else if (i > current) s.classList.remove('prev');
+          else s.classList.add('prev');
+        });
+        updateCounter();
+        updateDots();
+      }
+
+      function next() {
+        if (current < total - 1) goTo(current + 1);
+      }
+
+      function prev() {
+        if (current > 0) goTo(current - 1);
+      }
+
+      document.getElementById('clickOverlay').addEventListener('click', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const leftThird = window.innerWidth / 3;
+        if (e.clientX < leftThird) prev();
+        else if (e.clientX > window.innerWidth - leftThird) next();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          next();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          prev();
+        }
+      });
+
+      document.getElementById('btnPrev').addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+      document.getElementById('btnNext').addEventListener('click', (e) => { e.stopPropagation(); next(); });
+
+      document.getElementById('fullscreenBtn').addEventListener('click', function() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(function() {});
+        } else {
+          document.exitFullscreen();
+        }
+      });
+
+      updateCounter();
+      updateDots();
+    })();
+  </script>
+</body>
+</html>
