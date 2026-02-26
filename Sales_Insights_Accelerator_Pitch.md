@@ -139,7 +139,11 @@ Our team members only had free license in PowerBi.Therefore couldn't able to int
 Since outside traffic is blocked in the app running on snowflake couldnt able to integrate with openareana chains.
 
 Slide - 13
-Lessons Learned
+Lessons Learnt
+- A clear semantic layer is essential for reliable NLP-to-SQL conversion.
+- Streamlit gave us full control over chat UX and visualization, unlike the AI Agent.
+- Licensing and network restrictions shaped our integration options more than we expected.
+- Team spirit mattered: parallel work, mutual support, and creative problem-solving when we hit blockers.
 
 Slide - 14
 
