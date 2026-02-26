@@ -375,6 +375,43 @@
   }
   .vflow .sf-n small { font-size: .76rem; }
 
+  .vflow-branch {
+    position: relative;
+    display: flex; align-items: center;
+    justify-content: center;
+  }
+  .vflow-branch .sf-n.branch-main {
+    min-width: 200px; max-width: 280px;
+  }
+  .vflow-branch .sf-n.branch-input {
+    position: absolute; right: calc(50% + 178px);
+    min-width: auto; white-space: nowrap;
+  }
+  .vflow-branch .vflow-h {
+    position: absolute; right: calc(50% + 140px);
+    width: 28px; height: 0;
+    border-top: 1.5px solid var(--muted);
+  }
+  .vflow-branch .vflow-h::after {
+    content: ''; position: absolute;
+    right: -1px; top: -4px;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+    border-left: 5px solid var(--muted);
+  }
+  .vflow-branch .vflow-h.tracing { border-top-color: rgba(0,212,255,.5); }
+  .vflow-branch .vflow-h.tracing::after { border-left-color: rgba(0,212,255,.5); }
+  .vflow-branch .vflow-h.tracing::before {
+    content: '';
+    position: absolute; top: -3px; left: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #00d4ff;
+    box-shadow: 0 0 10px rgba(0,212,255,.8), 0 0 20px rgba(0,212,255,.4);
+    animation: dot-right .5s linear forwards;
+  }
+  .vflow-branch .vflow-h.traced { border-top-color: rgba(0,212,255,.35); }
+  .vflow-branch .vflow-h.traced::after { border-left-color: rgba(0,212,255,.35); }
+
   /* ─── Settings-flow trace animation ─────────────────────── */
   .vflow .sf-n.tracing {
     box-shadow: 0 0 18px rgba(0,212,255,.3);
@@ -804,7 +841,11 @@
           <div class="vflow-ar"></div>
           <div class="sf-n dat">Retrieve Table<small>Metadata</small></div>
           <div class="vflow-ar"></div>
-          <div class="sf-n ai">AI Enhances Semantic View<small>with Descriptions</small></div>
+          <div class="vflow-branch">
+            <div class="sf-n dat branch-input">System Prompt</div>
+            <div class="vflow-h"></div>
+            <div class="sf-n ai branch-main">AI Enhances Semantic View<small>with Descriptions</small></div>
+          </div>
           <div class="vflow-ar"></div>
           <div class="sf-n dat">Save Enhanced YAML<small>to Snowflake Stage</small></div>
           <div class="vflow-ar"></div>
@@ -1210,6 +1251,7 @@ function stopSettingsFlow() {
   if (!vf) return;
   vf.querySelectorAll('.sf-n').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
   vf.querySelectorAll('.vflow-ar').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
+  vf.querySelectorAll('.vflow-h').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
 }
 
 function animateSettingsFlow() {
@@ -1220,8 +1262,16 @@ function animateSettingsFlow() {
 
   var items = [];
   Array.from(vf.children).forEach(function(el) {
-    if (el.classList.contains('sf-n')) items.push({ el: el, type: 'node' });
-    else if (el.classList.contains('vflow-ar')) items.push({ el: el, type: 'arrow' });
+    if (el.classList.contains('sf-n')) {
+      items.push({ el: el, type: 'node' });
+    } else if (el.classList.contains('vflow-ar')) {
+      items.push({ el: el, type: 'arrow' });
+    } else if (el.classList.contains('vflow-branch')) {
+      Array.from(el.children).forEach(function(child) {
+        if (child.classList.contains('sf-n')) items.push({ el: child, type: 'node' });
+        else if (child.classList.contains('vflow-h')) items.push({ el: child, type: 'arrow' });
+      });
+    }
   });
 
   var idx = 0;
