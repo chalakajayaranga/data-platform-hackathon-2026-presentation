@@ -228,6 +228,9 @@
   .flow-box.blue .flow-icon { color: var(--blue); }
   .flow-box.purple .flow-icon { color: var(--purple); }
   .flow-box.green .flow-icon { color: var(--green); }
+  .slide2-icon { display: block; }
+  .slide2-icon svg { width: 100%; height: 100%; display: block; }
+
   .flow-arrow { color: var(--cyan); flex-shrink: 0; display: flex; align-items: center; position: relative; }
   .flow-arrow svg { width: 20px; height: 20px; }
   .flow-box { position: relative; transition: box-shadow .3s, border-color .3s; }
@@ -534,19 +537,27 @@
         <div class="divider" style="margin:8px 0 16px;"></div>
         <div class="card" style="margin-bottom:16px;padding:20px 24px;">
           <p style="font-size:1.15rem;line-height:1.75;color:var(--text);">
-            Build an <strong style="color:var(--cyan);">intelligent semantic layer</strong> on Snowflake that removes traditional query barriers. Create a <strong style="color:var(--cyan);">natural-language interface</strong> that lets analysts explore visual content performance, trends, and user engagement patterns through conversational questions—without needing complex SQL.
+            Build an <strong style="color:var(--cyan);">intelligent semantic layer</strong> on Snowflake that removes traditional query barriers. Create a <strong style="color:var(--cyan);">natural-language interface</strong> that lets analysts explore visual content performance, trends, and user engagement patterns through conversational questions without needing complex SQL.
           </p>
         </div>
         <div class="grid-2" style="gap:16px;">
           <div class="card" style="padding:16px 20px;">
-            <div style="font-size:1.4rem;margin-bottom:8px;">🎯</div>
-            <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:6px;">Goal</h3>
-            <p style="font-size:1rem;color:var(--muted);">Reuters Unified Marketplace (RUM) enhanced data ecosystem — accessible to every analyst.</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+              <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Goal</h3>
+            </div>
+            <p style="font-size:1rem;color:var(--muted);margin:0;">Reuters Unified Marketplace (RUM) enhanced data ecosystem accessible to every analyst.</p>
           </div>
           <div class="card" style="padding:16px 20px;">
-            <div style="font-size:1.4rem;margin-bottom:8px;">💬</div>
-            <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:6px;">Experience</h3>
-            <p style="font-size:1rem;color:var(--muted);">Ask in plain language; get visual content performance, trends, and engagement insights instantly.</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+              <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Experience</h3>
+            </div>
+            <p style="font-size:1rem;color:var(--muted);margin:0;">Ask in plain language, get visual content performance, trends, and engagement insights instantly.</p>
           </div>
         </div>
       </div>

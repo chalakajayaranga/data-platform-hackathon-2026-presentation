@@ -1,0 +1,3 @@
+Snow Mind - The most wanted solution for conversational revenue intellignece at TR.
+Building an intelligent semantic layer on snowflake it enables you to ask questions in natural
+language and get insights from your data.
