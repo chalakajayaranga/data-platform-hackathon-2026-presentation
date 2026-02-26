@@ -758,80 +758,16 @@
       </div>
     </div>
 
-    <!-- ═══ SLIDE 7 – CHAT FLOW DIAGRAM (SNAKE) ═══ -->
+    <!-- ═══ SLIDE 7 – CHAT FLOW DIAGRAM ═══ -->
     <div class="slide" data-slide="7">
       <div class="s-num">07 / 14</div>
-      <div style="width:100%;max-width:min(98vw,1200px);">
+      <div class="content-wide">
         <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
         <h2 class="slide-title" style="text-align:center;">Chat Flow — <span>Streamlit App in Action</span></h2>
-        <div class="divider" style="margin:4px auto 10px;"></div>
-
-        <div class="sf-wrap">
-          <div class="sf">
-            <!-- ── ROW 1 (→) ── -->
-            <div class="sf-row">
-              <div class="sf-n tm" id="fc-start">User Opens App</div>
-              <div class="sf-h"></div>
-              <div class="sf-n dec" id="fc-config">Configuration Set?</div>
-              <div class="sf-h"></div>
-              <span class="sf-lbl yes">Yes</span>
-              <div class="sf-h"></div>
-              <div class="sf-n ui" id="fc-query">Enter NL Query</div>
-              <div class="sf-h"></div>
-              <div class="sf-n ai">Cortex Analyst<small>NLP → SQL</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n dat" id="fc-exec">Execute SQL<small>on Snowflake</small></div>
-            </div>
-
-            <!-- Config No branch -->
-            <div class="sf-sub" id="sf-config-sub">
-              <div class="sf-sub-arm">
-                <span class="sf-lbl no">No ↓</span>
-                <div class="sf-n ui" style="font-size:.66rem;padding:4px 7px;">Select DB, Schema &amp; View</div>
-                <span class="sf-loop">↻ back</span>
-              </div>
-            </div>
-
-            <div class="sf-turn"></div>
-
-            <!-- ── ROW 2 (←) ── -->
-            <div class="sf-row rtl">
-              <div class="sf-n dat" id="fc-results">Get Query Results</div>
-              <div class="sf-h"></div>
-              <div class="sf-n ai">AI Generates<small>Streaming Answer</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n dec" id="fc-needviz">Need Visualization?</div>
-            </div>
-
-            <div class="sf-turn"></div>
-
-            <!-- ── ROW 3 (→) ── -->
-            <div class="sf-row">
-              <div class="sf-n dat" id="fc-analyze">Analyze Data<small>DataFrame Schema</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n ai">AI Suggests<small>Chart Definitions</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n sec">Validate<small>Chart Security</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n viz">Render Plotly<small>Charts</small></div>
-              <div class="sf-h"></div>
-              <div class="sf-n viz" id="fc-display">Display Answer<small>to User</small></div>
-            </div>
-
-            <div class="sf-turn"></div>
-
-            <!-- ── ROW 4 (←) ── -->
-            <div class="sf-row rtl">
-              <div class="sf-n dec" id="fc-moreq">More Questions?</div>
-              <div class="sf-h"></div>
-              <span class="sf-lbl no">No</span>
-              <div class="sf-h"></div>
-              <div class="sf-n tm" id="fc-end">End</div>
-            </div>
-          </div>
-          <svg class="sf-svg"></svg>
+        <div class="divider" style="margin:8px auto 16px;"></div>
+        <div class="card card-highlight" style="padding:20px;overflow:hidden;margin-top:40px;">
+          <img src="images/flow-diagram.png" alt="Chat flow diagram" style="width:100%;height:auto;display:block;border-radius:8px;"/>
         </div>
-
       </div>
     </div>
 
@@ -1319,7 +1255,6 @@ function animateSettingsFlow() {
 var _origUpdateUI = updateUI;
 updateUI = function() {
   _origUpdateUI();
-  if (current === 7) setTimeout(drawFlowConnections, 500);
   if (current === 8) setTimeout(animateSettingsFlow, 600);
   else stopSettingsFlow();
   if (current === 3) setTimeout(animateSlide3Flow, 600);
@@ -1327,7 +1262,7 @@ updateUI = function() {
   if (current === 5) setTimeout(animateSlide5Flow, 600);
   else stopSlide5Flow();
 };
-window.addEventListener('resize', function() { if (current === 7) drawFlowConnections(); });
+window.addEventListener('resize', function() {});
 
 </script>
 </body>
