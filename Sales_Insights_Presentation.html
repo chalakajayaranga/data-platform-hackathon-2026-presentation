@@ -33,58 +33,16 @@
     --glow-blue: 0 0 20px rgba(59,130,246,.35);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   html, body {
-    height: 100%;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     font-size: 17px;
     background: var(--bg);
     color: var(--text);
-    overflow: hidden;
   }
-
-  /* ─── Presentation Shell ───────────────────────────────── */
-  #presentation {
-    width: 100vw; height: 100vh;
-    display: flex; flex-direction: column;
-    position: relative;
-  }
-
-  /* ─── Slide Container ──────────────────────────────────── */
-  #slide-area {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .slide {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    padding: 32px 40px;
-    opacity: 0;
-    pointer-events: none;
-    overflow-y: auto;
-    will-change: transform, opacity;
-  }
-  .slide.active {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .slide.animating {
-    transition: transform .42s cubic-bezier(.4,0,.2,1), opacity .42s cubic-bezier(.4,0,.2,1);
-  }
-
-  /* ─── Background decorations ───────────────────────────── */
-  .slide::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,212,255,.06) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(139,92,246,.07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .slide > * { position: relative; z-index: 1; }
 
   body::before {
     content: '';
@@ -97,56 +55,68 @@
     z-index: 0;
   }
 
-  /* ─── Navigation Bar ───────────────────────────────────── */
-  #nav {
+  /* ─── Sticky Top Bar ───────────────────────────────────── */
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0;
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 32px;
-    background: rgba(14,22,40,.85);
-    backdrop-filter: blur(12px);
-    border-top: 1px solid var(--border);
+    background: rgba(8,13,26,.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
     z-index: 100;
-    flex-shrink: 0;
   }
-
-  #nav .nav-left { display: flex; align-items: center; gap: 12px; }
-  #nav .logo { font-size: 1.1rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  #nav .slide-counter { font-size: .9rem; color: var(--muted); }
-
-  #nav .nav-center {
+  #topbar .logo {
+    font-size: 1.1rem; font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  #topbar .topbar-nav {
     display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
-    max-width: 600px;
   }
-  .nav-dot {
+  .topbar-dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--border); cursor: pointer;
     transition: background .3s, transform .3s;
     border: none;
   }
-  .nav-dot.active { background: var(--cyan); transform: scale(1.4); box-shadow: var(--glow); }
-  .nav-dot:hover:not(.active) { background: var(--blue); }
+  .topbar-dot.active { background: var(--cyan); transform: scale(1.4); box-shadow: var(--glow); }
+  .topbar-dot:hover:not(.active) { background: var(--blue); }
 
-  #nav .nav-right { display: flex; gap: 10px; }
-  .nav-btn {
-    padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
-    background: transparent; color: var(--text); cursor: pointer;
-    font-size: .9rem; font-weight: 600;
-    transition: all .25s;
+  /* ─── Sections (formerly slides) ───────────────────────── */
+  .section {
+    position: relative;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    min-height: 100vh;
+    padding: 100px 40px 60px;
   }
-  .nav-btn:hover { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: var(--glow-blue); }
-  .nav-btn:disabled { opacity: .3; cursor: default; }
-  .nav-btn.primary { background: var(--gradient); border: none; color: #fff; }
-  .nav-btn.primary:hover { opacity: .85; box-shadow: var(--glow); }
 
-  /* ─── Progress bar ─────────────────────────────────────── */
-  #progress {
-    height: 3px;
-    background: var(--border);
-    flex-shrink: 0;
+  .section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 20%, rgba(0,212,255,.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(139,92,246,.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
   }
-  #progress-fill {
-    height: 100%;
-    background: var(--gradient);
-    transition: width .4s ease;
+  .section > * { position: relative; z-index: 1; }
+
+  .section-sep {
+    width: 100%; max-width: 900px; margin: 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ─── Scroll Reveal ────────────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   /* ─── Typography ───────────────────────────────────────── */
@@ -208,8 +178,8 @@
     flex-wrap: wrap; justify-content: center;
     margin: 8px 0;
   }
-  [data-slide="5"] .flow-row { align-items: stretch; }
-  [data-slide="5"] .flow-box { display: flex; flex-direction: column; justify-content: center; }
+  [data-section="5"] .flow-row { align-items: stretch; }
+  [data-section="5"] .flow-box { display: flex; flex-direction: column; justify-content: center; }
   .flow-box {
     background: var(--card);
     border: 1px solid var(--border);
@@ -277,7 +247,6 @@
   }
 
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
 
   .snowflake-hero {
     font-size: 4rem; line-height: 1;
@@ -285,84 +254,25 @@
     animation: float 4s ease-in-out infinite;
     display: block; text-align: center; margin-bottom: 8px;
   }
-  .fade-up { opacity: 0; animation: fadeUp .6s ease forwards; }
-  .fade-up:nth-child(2) { animation-delay: .1s; }
-  .fade-up:nth-child(3) { animation-delay: .2s; }
-  .fade-up:nth-child(4) { animation-delay: .3s; }
-  .fade-up:nth-child(5) { animation-delay: .4s; }
-  .fade-up:nth-child(6) { animation-delay: .5s; }
 
   .content-wide { width: 100%; max-width: min(95vw, 1200px); }
   .content-narrow { width: 100%; max-width: min(90vw, 900px); }
 
   .s-num {
-    position: absolute; top: 20px; right: 24px;
+    position: absolute; top: 80px; right: 24px;
     font-size: .88rem; color: var(--muted);
     font-weight: 600; letter-spacing: .08em;
+    z-index: 2;
   }
 
-  .slide::-webkit-scrollbar { width: 4px; }
-  .slide::-webkit-scrollbar-track { background: transparent; }
-  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
   @media (max-width: 768px) {
-    .slide { padding: 20px 24px 24px; }
+    .section { padding: 80px 24px 40px; }
     .grid-2 { grid-template-columns: 1fr; }
-    #nav .nav-center { display: none; }
+    #topbar .topbar-nav { display: none; }
     h1.hero-title { font-size: 2.2rem; }
     .flow-row { flex-direction: column; }
     .flow-arrow { transform: rotate(90deg); }
   }
-
-  #fs-btn {
-    position: fixed; top: 16px; right: 16px;
-    background: rgba(14,22,40,.8); border: 1px solid var(--border);
-    color: var(--muted); border-radius: 8px; padding: 6px 10px;
-    cursor: pointer; font-size: .85rem; z-index: 200;
-    backdrop-filter: blur(8px);
-    transition: color .2s, border-color .2s;
-  }
-  #fs-btn:hover { color: var(--cyan); border-color: var(--cyan); }
-
-  /* ─── Snake Flowchart ─────────────────────────────────────── */
-  .sf-wrap { position: relative; width: 100%; }
-  .sf { width: 100%; }
-  .sf-row { display: flex; align-items: center; gap: 5px; padding: 0 28px 0 22px; }
-  .sf-row.rtl { flex-direction: row-reverse; }
-
-  .sf-n {
-    padding: 6px 10px; border-radius: 10px;
-    font-size: .78rem; font-weight: 600; text-align: center;
-    border: 1.5px solid var(--border); background: var(--card);
-    color: var(--text); line-height: 1.3;
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .sf-n small { font-weight: 400; font-size: .7rem; color: var(--muted); display: block; }
-  .sf-n.tm  { border-radius: 50px; background: rgba(0,212,255,.08); border-color: rgba(0,212,255,.35); color: var(--cyan); }
-  .sf-n.dec { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.35); color: var(--orange); }
-  .sf-n.ai  { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.35); color: var(--purple); }
-  .sf-n.dat { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.35); color: var(--blue); }
-  .sf-n.viz { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.35); color: var(--green); }
-  .sf-n.ui  { background: rgba(0,212,255,.06); border-color: rgba(0,212,255,.3); color: var(--cyan); }
-  .sf-n.sec { background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.3); color: var(--red); }
-
-  .sf-h { flex: 1; min-width: 14px; display: flex; align-items: center; }
-  .sf-h::before { content: ''; flex: 1; height: 0; border-top: 1.5px solid var(--muted); }
-  .sf-h::after { content: ''; flex-shrink: 0; border-top: 3px solid transparent; border-bottom: 3px solid transparent; border-left: 5px solid var(--muted); }
-  .sf-row.rtl .sf-h { flex-direction: row-reverse; }
-  .sf-row.rtl .sf-h::after { border-left: none; border-right: 5px solid var(--muted); }
-
-  .sf-turn { height: 16px; }
-
-  .sf-lbl { font-size: .64rem; font-weight: 700; margin: 0 -1px; flex-shrink: 0; }
-  .sf-lbl.yes { color: var(--green); }
-  .sf-lbl.no  { color: var(--red); }
-
-  .sf-sub { display: flex; align-items: flex-start; gap: 6px; padding: 2px 4px 0; margin-top: -2px; }
-  .sf-sub-arm { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .sf-loop { font-size: .62rem; font-weight: 700; color: var(--cyan); }
-
-  .sf-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 
   /* ─── Vertical Flowchart (simple linear) ─────────────────── */
   .vflow { display: flex; flex-direction: column; align-items: center; }
@@ -370,6 +280,7 @@
     width: 0; height: 22px;
     border-left: 1.5px solid var(--muted);
     position: relative; flex-shrink: 0;
+    transition: border-color .2s;
   }
   .vflow-ar::after {
     content: ''; position: absolute;
@@ -385,6 +296,21 @@
     transition: box-shadow .3s, border-color .3s;
   }
   .vflow .sf-n small { font-size: .76rem; }
+  .sf-n {
+    padding: 6px 10px; border-radius: 10px;
+    font-size: .78rem; font-weight: 600; text-align: center;
+    border: 1.5px solid var(--border); background: var(--card);
+    color: var(--text); line-height: 1.3;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .sf-n small { font-weight: 400; font-size: .7rem; color: var(--muted); display: block; }
+  .sf-n.tm  { border-radius: 50px; background: rgba(0,212,255,.08); border-color: rgba(0,212,255,.35); color: var(--cyan); }
+  .sf-n.dec { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.35); color: var(--orange); }
+  .sf-n.ai  { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.35); color: var(--purple); }
+  .sf-n.dat { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.35); color: var(--blue); }
+  .sf-n.viz { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.35); color: var(--green); }
+  .sf-n.ui  { background: rgba(0,212,255,.06); border-color: rgba(0,212,255,.3); color: var(--cyan); }
+  .sf-n.sec { background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.3); color: var(--red); }
 
   .vflow-branch {
     position: relative;
@@ -458,9 +384,6 @@
     to   { --trace-a: 360deg; }
   }
 
-  .vflow-ar {
-    transition: border-color .2s;
-  }
   .vflow-ar.tracing::before {
     content: '';
     position: absolute; left: -3px;
@@ -479,13 +402,13 @@
     to   { top: calc(100% - 5px); }
   }
 
-  /* ─── Slide 3 & 5 flow animation (same as slide 8) ───────── */
-  [data-slide="3"] .flow-box.tracing,
-  [data-slide="5"] .flow-box.tracing {
+  /* ─── Slide 3 & 5 flow animation ───────────────────────── */
+  [data-section="3"] .flow-box.tracing,
+  [data-section="5"] .flow-box.tracing {
     box-shadow: 0 0 18px rgba(0,212,255,.3);
   }
-  [data-slide="3"] .flow-box.tracing::before,
-  [data-slide="5"] .flow-box.tracing::before {
+  [data-section="3"] .flow-box.tracing::before,
+  [data-section="5"] .flow-box.tracing::before {
     content: '';
     position: absolute; inset: -2px;
     border-radius: inherit;
@@ -507,15 +430,15 @@
     pointer-events: none;
     animation: trace-spin 1.4s linear;
   }
-  [data-slide="3"] .flow-box.traced,
-  [data-slide="5"] .flow-box.traced {
+  [data-section="3"] .flow-box.traced,
+  [data-section="5"] .flow-box.traced {
     box-shadow: 0 0 10px rgba(0,212,255,.15);
     border-color: rgba(0,212,255,.4) !important;
   }
-  [data-slide="3"] .flow-arrow,
-  [data-slide="5"] .flow-arrow { transition: color .2s; }
-  [data-slide="3"] .flow-arrow.tracing::before,
-  [data-slide="5"] .flow-arrow.tracing::before {
+  [data-section="3"] .flow-arrow,
+  [data-section="5"] .flow-arrow { transition: color .2s; }
+  [data-section="3"] .flow-arrow.tracing::before,
+  [data-section="5"] .flow-arrow.tracing::before {
     content: '';
     position: absolute; top: 50%; left: -2px;
     width: 7px; height: 7px; border-radius: 50%;
@@ -524,35 +447,39 @@
     animation: dot-right .5s linear forwards;
     transform: translateY(-50%);
   }
-  [data-slide="3"] .flow-arrow.tracing,
-  [data-slide="5"] .flow-arrow.tracing { color: rgba(0,212,255,.8); }
-  [data-slide="3"] .flow-arrow.traced,
-  [data-slide="5"] .flow-arrow.traced { color: rgba(0,212,255,.5); }
+  [data-section="3"] .flow-arrow.tracing,
+  [data-section="5"] .flow-arrow.tracing { color: rgba(0,212,255,.8); }
+  [data-section="3"] .flow-arrow.traced,
+  [data-section="5"] .flow-arrow.traced { color: rgba(0,212,255,.5); }
   @keyframes dot-right {
     from { left: -2px; }
     to   { left: calc(100% - 5px); }
   }
 
-  /* ─── Slide 14 Thank You animation ───────────────────────── */
-  [data-slide="14"] .ty-wrap { opacity: 0; }
-  [data-slide="14"].active .ty-wrap { opacity: 1; }
-  [data-slide="14"].active .ty-title {
+  /* ─── Thank You animation ──────────────────────────────── */
+  [data-section="14"] .ty-title {
+    opacity: 0;
+  }
+  [data-section="14"] .ty-divider {
+    opacity: 0;
+  }
+  [data-section="14"] .ty-sub {
+    opacity: 0;
+  }
+  [data-section="14"].in-view .ty-title {
     animation: thankYouIn .8s cubic-bezier(.34,1.56,.64,1) forwards;
-    opacity: 0;
   }
-  [data-slide="14"].active .ty-divider {
+  [data-section="14"].in-view .ty-divider {
     animation: thankYouIn .6s ease .25s forwards;
-    opacity: 0;
   }
-  [data-slide="14"].active .ty-sub {
+  [data-section="14"].in-view .ty-sub {
     animation: thankYouIn .6s ease .45s forwards;
-    opacity: 0;
   }
-  [data-slide="14"].active .ty-snowflake {
+  [data-section="14"].in-view .ty-snowflake {
     animation: float 4s ease-in-out infinite;
     filter: drop-shadow(0 0 16px rgba(0,212,255,.4));
   }
-  [data-slide="14"].active .ty-title span {
+  [data-section="14"].in-view .ty-title span {
     animation: thankYouGlow 2.5s ease-in-out infinite .8s;
   }
   @keyframes thankYouIn {
@@ -563,707 +490,509 @@
     0%, 100% { transform: scale(1); opacity: 1; }
     50%      { transform: scale(1.03); opacity: .95; }
   }
+
+  /* ─── Scrollbar ────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 </style>
 </head>
 <body>
 
-<button id="fs-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶ Fullscreen</button>
+<!-- ─── Sticky Top Bar ─────────────────────────────────── -->
+<div id="topbar">
+  <span class="logo">❄️ Snow Mind</span>
+  <div class="topbar-nav" id="topbar-nav"></div>
+</div>
 
-<div id="presentation">
-  <div id="progress"><div id="progress-fill"></div></div>
-  <div id="slide-area">
+<!-- ═══ SECTION 1 – HERO / TITLE ═══ -->
+<div class="section" data-section="1" id="sec-1">
+  <div class="s-num">01 / 14</div>
+  <span class="snowflake-hero">❄️</span>
+  <h1 class="hero-title">Snow Mind</h1>
+  <p class="slide-subtitle" style="font-size:1.3rem;">Conversational Revenue Intelligence</p>
+  <div class="divider"></div>
+  <p style="text-align:center;font-size:1.1rem;color:var(--muted);max-width:560px;">
+    Intelligent semantic layer on Snowflake — ask questions in natural language and get insights from your data.
+  </p>
+  <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+    <span class="badge">🏆 Data Platform Hackathon 2026</span>
+    <span class="badge purple">Pagero Hackstreet Boys</span>
+  </div>
+</div>
 
-    <!-- ═══ SLIDE 1 – HERO / TITLE ═══ -->
-    <div class="slide active" data-slide="1">
-      <div class="s-num">01 / 14</div>
-      <span class="snowflake-hero">❄️</span>
-      <h1 class="hero-title fade-up">Snow Mind</h1>
-      <p class="slide-subtitle fade-up" style="font-size:1.3rem;">Conversational Revenue Intelligence</p>
-      <div class="divider fade-up"></div>
-      <p class="fade-up" style="text-align:center;font-size:1.1rem;color:var(--muted);max-width:560px;">
-        Intelligent semantic layer on Snowflake — ask questions in natural language and get insights from your data.
+<!-- ═══ SECTION 2 – THE CHALLENGE ═══ -->
+<div class="section" data-section="2" id="sec-2">
+  <div class="s-num">02 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag">The Challenge</div>
+    <h2 class="slide-title">Transform how Reuters analysts work with <span>RUM</span></h2>
+    <div class="divider" style="margin:8px 0 16px;"></div>
+    <div class="card" style="margin-bottom:16px;padding:20px 24px;">
+      <p style="font-size:1.15rem;line-height:1.75;color:var(--text);">
+        Build an <strong style="color:var(--cyan);">intelligent semantic layer</strong> on Snowflake that removes traditional query barriers. Create a <strong style="color:var(--cyan);">natural-language interface</strong> that lets analysts explore visual content performance, trends, and user engagement patterns through conversational questions without needing complex SQL.
       </p>
-      <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;" class="fade-up">
-        <span class="badge">🏆 Data Platform Hackathon 2026</span>
-        <span class="badge purple">Pagero Hackstreet Boys</span>
-      </div>
     </div>
-
-    <!-- ═══ SLIDE 2 – THE CHALLENGE ═══ -->
-    <div class="slide" data-slide="2">
-      <div class="s-num">02 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag">The Challenge</div>
-        <h2 class="slide-title">Transform how Reuters analysts work with <span>RUM</span></h2>
-        <div class="divider" style="margin:8px 0 16px;"></div>
-        <div class="card" style="margin-bottom:16px;padding:20px 24px;">
-          <p style="font-size:1.15rem;line-height:1.75;color:var(--text);">
-            Build an <strong style="color:var(--cyan);">intelligent semantic layer</strong> on Snowflake that removes traditional query barriers. Create a <strong style="color:var(--cyan);">natural-language interface</strong> that lets analysts explore visual content performance, trends, and user engagement patterns through conversational questions without needing complex SQL.
-          </p>
-        </div>
-        <div class="grid-2" style="gap:16px;">
-          <div class="card" style="padding:16px 20px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-              <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              </div>
-              <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Goal</h3>
-            </div>
-            <p style="font-size:1rem;color:var(--muted);margin:0;">Reuters Unified Marketplace (RUM) enhanced data ecosystem accessible to every analyst.</p>
+    <div class="grid-2" style="gap:16px;">
+      <div class="card" style="padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           </div>
-          <div class="card" style="padding:16px 20px;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-              <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Experience</h3>
-            </div>
-            <p style="font-size:1rem;color:var(--muted);margin:0;">Ask in plain language; get visual content performance, trends and engagement insights instantly while keeping your chat history</p>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Goal</h3>
+        </div>
+        <p style="font-size:1rem;color:var(--muted);margin:0;">Reuters Unified Marketplace (RUM) enhanced data ecosystem accessible to every analyst.</p>
+      </div>
+      <div class="card" style="padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+          <div class="slide2-icon" style="width:36px;height:36px;flex-shrink:0;color:var(--cyan);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--white);margin:0;">Experience</h3>
         </div>
+        <p style="font-size:1rem;color:var(--muted);margin:0;">Ask in plain language; get visual content performance, trends and engagement insights instantly while keeping your chat history</p>
       </div>
-    </div>
-
-    <!-- ═══ SLIDE 3 – APPROACH 1: SNOWFLAKE AI AGENT ═══ -->
-    <div class="slide" data-slide="3">
-      <div class="s-num">03 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag">Approach 1</div>
-        <h2 class="slide-title">Using <span>Snowflake AI Agent</span></h2>
-        <p class="slide-subtitle" style="margin-bottom:12px;">Semantic view + AI Agent so users can query data via natural language</p>
-        <div class="divider" style="margin:0 auto 16px;"></div>
-
-        <!-- Flow diagram -->
-        <div class="card" style="padding:20px 24px;margin-bottom:16px;">
-          <div class="flow-row" id="flow-row-3">
-            <div class="flow-box cyan">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
-              AI Agent Chat
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box blue">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
-              Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box purple">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
-              Summarize response<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box green">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
-              Visualize response<br/><small style="color:var(--muted);font-size:.9rem;">AI Agent</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.25);padding:16px 20px;">
-          <h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-            <span style="width:22px;height:22px;flex-shrink:0;color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
-            Drawbacks
-          </h3>
-          <ul class="drawbacks-list">
-            <li>
-              <span class="drawback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
-              Semantic model has to be updated manually if the database structure changes
-            </li>
-            <li>
-              <span class="drawback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
-              Less control on visualization of the response
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 4 – AI AGENT SCREENSHOT ═══ -->
-    <div class="slide" data-slide="4">
-      <div class="s-num">04 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag">Approach 1 — Demo</div>
-        <h2 class="slide-title">Snowflake <span>AI Agent</span> in Action</h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-        <div class="card card-highlight" style="padding:12px;overflow:hidden;">
-          <img src="images/ai-agent.png" alt="AI Agent screenshot" style="width:100%;height:auto;display:block;border-radius:8px;"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 5 – APPROACH 2: CUSTOM STREAMLIT APP ═══ -->
-    <div class="slide" data-slide="5">
-      <div class="s-num">05 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag">Approach 2</div>
-        <h2 class="slide-title">Custom Chat Application using <span>Streamlit</span></h2>
-        <p class="slide-subtitle" style="margin-bottom:12px;">Streamlit UI with Plotly for full control over visualization</p>
-        <div class="divider" style="margin:0 auto 16px;"></div>
-
-        <!-- Flow diagram -->
-        <div class="card" style="padding:20px 24px;">
-          <div class="flow-row" id="flow-row-5">
-            <div class="flow-box cyan">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
-              Streamlit Chat
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box blue">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
-              Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box purple">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
-              Summarize response<br/>&<br/>Decide best visualization<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
-            </div>
-            <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            <div class="flow-box green">
-              <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
-              Plot response<br/><small style="color:var(--muted);font-size:.9rem;">Plotly</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 6 – WHY STREAMLIT ═══ -->
-    <div class="slide" data-slide="6">
-      <div class="s-num">06 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag">Approach 2</div>
-        <h2 class="slide-title">Why <span>Streamlit</span> Approach?</h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:900px;margin:0 auto;text-align:left;">
-          <div>
-            <h3 style="font-size:1rem;font-weight:700;color:var(--cyan);margin-bottom:10px;">Streamlit Benefits</h3>
-            <ul class="check-list" style="margin:0;">
-              <li>Full control on both frontend and backend logic</li>
-              <li>Showing visual diagrams inside the chat UI seamlessly</li>
-              <li>Ability to export queried data as CSV</li>
-              <li>Ability to enhance semantic views for any new schemas with relationships</li>
-              <li>Maintain chat history</li>
-              <li>Navigate between chats &amp; continue</li>
-            </ul>
-          </div>
-          <div>
-            <h3 style="font-size:1rem;font-weight:700;color:var(--purple);margin-bottom:10px;">By using Plotly</h3>
-            <ul class="check-list" style="margin:0;">
-              <li>No need for moving to external visualization tools like Power BI</li>
-              <li>No more expert knowledge</li>
-              <li>No extra cost</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 7 – CHAT FLOW DIAGRAM ═══ -->
-    <div class="slide" data-slide="7">
-      <div class="s-num">07 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
-        <h2 class="slide-title" style="text-align:center;">Chat Flow — <span>Streamlit App in Action</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-        <div class="card card-highlight" style="padding:20px;overflow:hidden;margin-top:40px;">
-          <img src="images/flow-diagram.png" alt="Chat flow diagram" style="width:100%;height:auto;display:block;border-radius:8px;"/>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 8 – SETTINGS FLOW DIAGRAM (VERTICAL) ═══ -->
-    <div class="slide" data-slide="8">
-      <div class="s-num">08 / 14</div>
-      <div style="width:100%;max-width:min(98vw,1200px);">
-        <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
-        <h2 class="slide-title" style="text-align:center;">Settings Flow — <span>Streamlit App in Action</span></h2>
-        <div class="divider" style="margin:4px auto 10px;"></div>
-
-        <div class="vflow">
-          <div class="sf-n tm">Settings Tab</div>
-          <div class="vflow-ar"></div>
-          <div class="sf-n dat">Select Database<small>&amp; Schema</small></div>
-          <div class="vflow-ar"></div>
-          <div class="sf-n ai">Generate Basic Semantic View<small>from Cortex Analytics &amp; Upload</small></div>
-          <div class="vflow-ar"></div>
-          <div class="sf-n dat">Retrieve Table<small>Metadata</small></div>
-          <div class="vflow-ar"></div>
-          <div class="vflow-branch">
-            <div class="sf-n dat branch-input">System Prompt</div>
-            <div class="vflow-h"></div>
-            <div class="sf-n ai branch-main">AI Enhances Semantic View<small>with Descriptions</small></div>
-          </div>
-          <div class="vflow-ar"></div>
-          <div class="sf-n dat">Save Enhanced YAML<small>to Snowflake Stage</small></div>
-          <div class="vflow-ar"></div>
-          <div class="sf-n tm" style="border-color:rgba(16,185,129,.35);color:var(--green);background:rgba(16,185,129,.08);">Ready for Use</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 9 – LIVE DEMO ═══ -->
-    <div class="slide" data-slide="9">
-      <div class="s-num">09 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
-        <h2 class="slide-title" style="text-align:center;">Live <span>Demo</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-        <p class="slide-subtitle" style="color:var(--muted);text-align:center;">Snow Mind in action</p>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 10 – BUSINESS IMPACT ═══ -->
-    <div class="slide" data-slide="10">
-      <div class="s-num">10 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Outcomes</div>
-        <h2 class="slide-title" style="text-align:center;">Business <span>Impact</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-
-        <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
-          <li>Faster time-to-insight - analysts get answers in seconds via natural language</li>
-          <li>Democratized analytics - no SQL expertise required; every analyst can query RUM data</li>
-          <li>Lower cost - no external BI tools or specialist dependency</li>
-          <li>Better decisions - real-time visual content performance, trends &amp; engagement insights</li>
-          <li>Self-maintaining semantic layer - easy to extend for new schemas &amp; relationships</li>
-          <li>Scalable adoption - more analysts can leverage RUM’s enhanced data ecosystem</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 11 – FUTURE WORKS ═══ -->
-    <div class="slide" data-slide="11">
-      <div class="s-num">11 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Roadmap</div>
-        <h2 class="slide-title" style="text-align:center;">Future <span>Works</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-
-        <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
-          <li>Add dynamic tables with indexes to improve query performance</li>
-          <li>Call OpenArena chains from Streamlit instead of Cortex Complete to integrate with customized LLMs for different use cases</li>
-          <li>Integrate with Power BI to visualize data</li>
-          <li>Persist chat history in Snowflake database to maintain conversation context across sessions</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 12 – CHALLENGES FACED ═══ -->
-    <div class="slide" data-slide="12">
-      <div class="s-num">12 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Learnings</div>
-        <h2 class="slide-title" style="text-align:center;">Challenges <span>Faced</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-
-        <ul class="challenges-list" style="max-width:640px;margin:0 auto;text-align:left;">
-          <li>
-            <span class="challenge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
-            Team had only Power BI free licenses - couldn’t integrate the Streamlit app with Power BI</li>
-          <li>
-            <span class="challenge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
-            Outbound traffic is blocked on Snowflake warehouse - couldn’t integrate with OpenArena chains</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 13 – LESSONS LEARNED ═══ -->
-    <div class="slide" data-slide="13">
-      <div class="s-num">13 / 14</div>
-      <div class="content-wide">
-        <div class="slide-tag" style="justify-content:center;">Learnings</div>
-        <h2 class="slide-title" style="text-align:center;">Lessons <span>Learned</span></h2>
-        <div class="divider" style="margin:8px auto 16px;"></div>
-
-        <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
-          <li>A clear semantic view is essential for reliable NLP-to-SQL conversion</li>
-          <li>Streamlit gave us full control over chat UX and visualization, unlike the AI Agent</li>
-          <li>Licensing and network restrictions shaped our integration options more than we expected</li>
-          <li>Team spirit mattered: parallel work, mutual support, and creative problem-solving when we hit blockers</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- ═══ SLIDE 14 – THANK YOU ═══ -->
-    <div class="slide" data-slide="14">
-      <div class="s-num">14 / 14</div>
-      <div class="content-wide ty-wrap">
-        <span class="ty-snowflake" style="display:block;font-size:3rem;text-align:center;margin-bottom:12px;">❄️</span>
-        <h2 class="slide-title ty-title" style="text-align:center;font-size:2.2rem;">Thank <span>You!</span></h2>
-        <div class="divider ty-divider" style="margin:16px auto;"></div>
-        <p class="slide-subtitle ty-sub" style="color:var(--muted);text-align:center;">Snow Mind — Pagero Hackstreet Boys</p>
-      </div>
-    </div>
-
-  </div><!-- /slide-area -->
-
-  <div id="nav">
-    <div class="nav-left">
-      <span class="logo">❄️ Snow Mind</span>
-      <span class="slide-counter" id="slide-counter">1 / 14</span>
-    </div>
-    <div class="nav-center" id="nav-dots"></div>
-    <div class="nav-right">
-      <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
-      <button class="nav-btn primary" id="next-btn" onclick="changeSlide(1)">Next →</button>
     </div>
   </div>
 </div>
 
+<!-- ═══ SECTION 3 – APPROACH 1: SNOWFLAKE AI AGENT ═══ -->
+<div class="section" data-section="3" id="sec-3">
+  <div class="s-num">03 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag">Approach 1</div>
+    <h2 class="slide-title">Using <span>Snowflake AI Agent</span></h2>
+    <p class="slide-subtitle" style="margin-bottom:12px;">Semantic view + AI Agent so users can query data via natural language</p>
+    <div class="divider" style="margin:0 auto 16px;"></div>
+
+    <div class="card" style="padding:20px 24px;margin-bottom:16px;">
+      <div class="flow-row" id="flow-row-3">
+        <div class="flow-box cyan">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          AI Agent Chat
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box blue">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
+          Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box purple">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+          Summarize response<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box green">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+          Visualize response<br/><small style="color:var(--muted);font-size:.9rem;">AI Agent</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.25);padding:16px 20px;">
+      <h3 style="font-size:1rem;font-weight:700;color:var(--red);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+        <span style="width:22px;height:22px;flex-shrink:0;color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+        Drawbacks
+      </h3>
+      <ul class="drawbacks-list">
+        <li>
+          <span class="drawback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+          Semantic model has to be updated manually if the database structure changes
+        </li>
+        <li>
+          <span class="drawback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+          Less control on visualization of the response
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 4 – AI AGENT SCREENSHOT ═══ -->
+<div class="section" data-section="4" id="sec-4">
+  <div class="s-num">04 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag">Approach 1 — Demo</div>
+    <h2 class="slide-title">Snowflake <span>AI Agent</span> in Action</h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+    <div class="card card-highlight" style="padding:12px;overflow:hidden;">
+      <img src="images/ai-agent.png" alt="AI Agent screenshot" style="width:100%;height:auto;display:block;border-radius:8px;"/>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 5 – APPROACH 2: CUSTOM STREAMLIT APP ═══ -->
+<div class="section" data-section="5" id="sec-5">
+  <div class="s-num">05 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag">Approach 2</div>
+    <h2 class="slide-title">Custom Chat Application using <span>Streamlit</span></h2>
+    <p class="slide-subtitle" style="margin-bottom:12px;">Streamlit UI with Plotly for full control over visualization</p>
+    <div class="divider" style="margin:0 auto 16px;"></div>
+
+    <div class="card" style="padding:20px 24px;">
+      <div class="flow-row" id="flow-row-5">
+        <div class="flow-box cyan">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+          Streamlit Chat
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box blue">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/></svg></span>
+          Convert NLP to Snowflake SQL<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Analyst</small>
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box purple">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+          Summarize response<br/>&<br/>Decide best visualization<br/><small style="color:var(--muted);font-size:.9rem;">Cortex Complete</small>
+        </div>
+        <span class="flow-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="flow-box green">
+          <span class="flow-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg></span>
+          Plot response<br/><small style="color:var(--muted);font-size:.9rem;">Plotly</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 6 – WHY STREAMLIT ═══ -->
+<div class="section" data-section="6" id="sec-6">
+  <div class="s-num">06 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag">Approach 2</div>
+    <h2 class="slide-title">Why <span>Streamlit</span> Approach?</h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:900px;margin:0 auto;text-align:left;">
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;color:var(--cyan);margin-bottom:10px;">Streamlit Benefits</h3>
+        <ul class="check-list" style="margin:0;">
+          <li>Full control on both frontend and backend logic</li>
+          <li>Showing visual diagrams inside the chat UI seamlessly</li>
+          <li>Ability to export queried data as CSV</li>
+          <li>Ability to enhance semantic views for any new schemas with relationships</li>
+          <li>Maintain chat history</li>
+          <li>Navigate between chats &amp; continue</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;color:var(--purple);margin-bottom:10px;">By using Plotly</h3>
+        <ul class="check-list" style="margin:0;">
+          <li>No need for moving to external visualization tools like Power BI</li>
+          <li>No more expert knowledge</li>
+          <li>No extra cost</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 7 – CHAT FLOW DIAGRAM ═══ -->
+<div class="section" data-section="7" id="sec-7">
+  <div class="s-num">07 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
+    <h2 class="slide-title" style="text-align:center;">Chat Flow — <span>Streamlit App in Action</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+    <div class="card card-highlight" style="padding:20px;overflow:hidden;margin-top:12px;">
+      <img src="images/flow-diagram.png" alt="Chat flow diagram" style="width:100%;height:auto;display:block;border-radius:8px;"/>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 8 – SETTINGS FLOW DIAGRAM (VERTICAL) ═══ -->
+<div class="section" data-section="8" id="sec-8">
+  <div class="s-num">08 / 14</div>
+  <div style="width:100%;max-width:min(98vw,1200px);" class="reveal">
+    <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
+    <h2 class="slide-title" style="text-align:center;">Settings Flow — <span>Streamlit App in Action</span></h2>
+    <div class="divider" style="margin:4px auto 10px;"></div>
+
+    <div class="vflow">
+      <div class="sf-n tm">Settings Tab</div>
+      <div class="vflow-ar"></div>
+      <div class="sf-n dat">Select Database<small>&amp; Schema</small></div>
+      <div class="vflow-ar"></div>
+      <div class="sf-n ai">Generate Basic Semantic View<small>from Cortex Analytics &amp; Upload</small></div>
+      <div class="vflow-ar"></div>
+      <div class="sf-n dat">Retrieve Table<small>Metadata</small></div>
+      <div class="vflow-ar"></div>
+      <div class="vflow-branch">
+        <div class="sf-n dat branch-input">System Prompt</div>
+        <div class="vflow-h"></div>
+        <div class="sf-n ai branch-main">AI Enhances Semantic View<small>with Descriptions</small></div>
+      </div>
+      <div class="vflow-ar"></div>
+      <div class="sf-n dat">Save Enhanced YAML<small>to Snowflake Stage</small></div>
+      <div class="vflow-ar"></div>
+      <div class="sf-n tm" style="border-color:rgba(16,185,129,.35);color:var(--green);background:rgba(16,185,129,.08);">Ready for Use</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECTION 9 – LIVE DEMO ═══ -->
+<div class="section" data-section="9" id="sec-9">
+  <div class="s-num">09 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Streamlit App</div>
+    <h2 class="slide-title" style="text-align:center;">Live <span>Demo</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+    <p class="slide-subtitle" style="color:var(--muted);text-align:center;">Snow Mind in action</p>
+  </div>
+</div>
+
+<!-- ═══ SECTION 10 – BUSINESS IMPACT ═══ -->
+<div class="section" data-section="10" id="sec-10">
+  <div class="s-num">10 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Outcomes</div>
+    <h2 class="slide-title" style="text-align:center;">Business <span>Impact</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+
+    <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
+      <li>Faster time-to-insight - analysts get answers in seconds via natural language</li>
+      <li>Democratized analytics - no SQL expertise required; every analyst can query RUM data</li>
+      <li>Lower cost - no external BI tools or specialist dependency</li>
+      <li>Better decisions - real-time visual content performance, trends &amp; engagement insights</li>
+      <li>Self-maintaining semantic layer - easy to extend for new schemas &amp; relationships</li>
+      <li>Scalable adoption - more analysts can leverage RUM's enhanced data ecosystem</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ SECTION 11 – FUTURE WORKS ═══ -->
+<div class="section" data-section="11" id="sec-11">
+  <div class="s-num">11 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Roadmap</div>
+    <h2 class="slide-title" style="text-align:center;">Future <span>Works</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+
+    <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
+      <li>Add dynamic tables with indexes to improve query performance</li>
+      <li>Call OpenArena chains from Streamlit instead of Cortex Complete to integrate with customized LLMs for different use cases</li>
+      <li>Integrate with Power BI to visualize data</li>
+      <li>Persist chat history in Snowflake database to maintain conversation context across sessions</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ SECTION 12 – CHALLENGES FACED ═══ -->
+<div class="section" data-section="12" id="sec-12">
+  <div class="s-num">12 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Learnings</div>
+    <h2 class="slide-title" style="text-align:center;">Challenges <span>Faced</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+
+    <ul class="challenges-list" style="max-width:640px;margin:0 auto;text-align:left;">
+      <li>
+        <span class="challenge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+        Team had only Power BI free licenses - couldn't integrate the Streamlit app with Power BI
+      </li>
+      <li>
+        <span class="challenge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        Outbound traffic is blocked on Snowflake warehouse - couldn't integrate with OpenArena chains
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ SECTION 13 – LESSONS LEARNED ═══ -->
+<div class="section" data-section="13" id="sec-13">
+  <div class="s-num">13 / 14</div>
+  <div class="content-wide reveal">
+    <div class="slide-tag" style="justify-content:center;">Learnings</div>
+    <h2 class="slide-title" style="text-align:center;">Lessons <span>Learned</span></h2>
+    <div class="divider" style="margin:8px auto 16px;"></div>
+
+    <ul class="check-list" style="max-width:640px;margin:0 auto;text-align:left;">
+      <li>A clear semantic view is essential for reliable NLP-to-SQL conversion</li>
+      <li>Streamlit gave us full control over chat UX and visualization, unlike the AI Agent</li>
+      <li>Licensing and network restrictions shaped our integration options more than we expected</li>
+      <li>Team spirit mattered: parallel work, mutual support, and creative problem-solving when we hit blockers</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══ SECTION 14 – THANK YOU ═══ -->
+<div class="section" data-section="14" id="sec-14">
+  <div class="s-num">14 / 14</div>
+  <div class="content-wide ty-wrap">
+    <span class="ty-snowflake" style="display:block;font-size:3rem;text-align:center;margin-bottom:12px;">❄️</span>
+    <h2 class="slide-title ty-title" style="text-align:center;font-size:2.2rem;">Thank <span>You!</span></h2>
+    <div class="divider ty-divider" style="margin:16px auto;"></div>
+    <p class="slide-subtitle ty-sub" style="color:var(--muted);text-align:center;">Snow Mind — Pagero Hackstreet Boys</p>
+  </div>
+</div>
+
 <script>
-const TOTAL = 14;
-let current = 1;
-let isAnimating = false;
+(function() {
+  var TOTAL = 14;
 
-function goToSlide(n, direction) {
-  if (isAnimating || n === current || n < 1 || n > TOTAL) return;
-  isAnimating = true;
-
-  const from = document.querySelector('.slide.active');
-  const to   = document.querySelector(`[data-slide="${n}"]`);
-  const enterFrom = direction > 0 ? 'translateX(100%)' : 'translateX(-100%)';
-  const exitTo    = direction > 0 ? 'translateX(-100%)' : 'translateX(100%)';
-
-  // 1. Position incoming slide off-screen, make it visible, no transition yet
-  to.classList.remove('animating');
-  to.style.transform = enterFrom;
-  to.style.opacity = '1';
-  to.classList.add('active');
-
-  // 2. Ensure outgoing slide has no transition class yet
-  from.classList.remove('animating');
-  from.style.transform = 'translateX(0)';
-
-  // 3. Force browser to paint the starting positions
-  void to.offsetWidth;
-
-  // 4. Add transition class and animate both simultaneously
-  from.classList.add('animating');
-  to.classList.add('animating');
-  from.style.transform = exitTo;
-  from.style.opacity = '0';
-  to.style.transform = 'translateX(0)';
-
-  // 5. Clean up after animation
-  setTimeout(() => {
-    from.classList.remove('active', 'animating');
-    from.style.transform = '';
-    from.style.opacity = '';
-    to.classList.remove('animating');
-    to.style.transform = '';
-    current = n;
-    updateUI();
-    isAnimating = false;
-  }, 450);
-}
-
-function changeSlide(dir) { goToSlide(current + dir, dir); }
-
-function updateUI() {
-  document.getElementById('slide-counter').textContent = `${current} / ${TOTAL}`;
-  document.getElementById('progress-fill').style.width = `${(current / TOTAL) * 100}%`;
-  document.getElementById('prev-btn').disabled = current === 1;
-  document.getElementById('next-btn').disabled = current === TOTAL;
-  document.querySelectorAll('.nav-dot').forEach((d, i) => {
-    d.classList.toggle('active', i + 1 === current);
-  });
-}
-
-function buildDots() {
-  const c = document.getElementById('nav-dots');
-  for (let i = 1; i <= TOTAL; i++) {
-    const b = document.createElement('button');
-    b.className = 'nav-dot' + (i === 1 ? ' active' : '');
-    b.title = `Slide ${i}`;
-    b.onclick = () => goToSlide(i, i > current ? 1 : -1);
-    c.appendChild(b);
-  }
-}
-
-document.addEventListener('keydown', e => {
-  if (['ArrowRight','ArrowDown','Space','PageDown'].includes(e.key)) { e.preventDefault(); changeSlide(1); }
-  if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); changeSlide(-1); }
-  if (e.key === 'Home') goToSlide(1, -1);
-  if (e.key === 'End')  goToSlide(TOTAL, 1);
-});
-
-let touchX = 0;
-document.getElementById('slide-area').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
-document.getElementById('slide-area').addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(dx) > 50) changeSlide(dx < 0 ? 1 : -1);
-});
-
-function toggleFullscreen() {
-  if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-  else document.exitFullscreen();
-}
-
-buildDots();
-updateUI();
-
-function drawFlowConnections() {
-  var svg = document.querySelector('.sf-svg');
-  if (!svg) return;
-  var wrap = document.querySelector('.sf-wrap');
-  if (!wrap) return;
-  var wR = wrap.getBoundingClientRect();
-  svg.setAttribute('width', wR.width);
-  svg.setAttribute('height', wR.height);
-  svg.setAttribute('viewBox', '0 0 ' + wR.width + ' ' + wR.height);
-  svg.innerHTML = '';
-
-  function p(id) {
-    var el = document.getElementById(id);
-    if (!el) return null;
-    var r = el.getBoundingClientRect();
-    return { cx: r.left - wR.left + r.width/2, cy: r.top - wR.top + r.height/2,
-             t: r.top - wR.top, b: r.top - wR.top + r.height,
-             l: r.left - wR.left, r: r.left - wR.left + r.width };
-  }
-  function mkLine(d, color, dashed) {
-    var pe = document.createElementNS('http://www.w3.org/2000/svg','path');
-    pe.setAttribute('d', d); pe.setAttribute('fill','none');
-    pe.setAttribute('stroke', color); pe.setAttribute('stroke-width','1.5');
-    if (dashed) pe.setAttribute('stroke-dasharray','5 3');
-    svg.appendChild(pe);
-  }
-  function mkArrow(pts, color) {
-    var a = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    a.setAttribute('points', pts); a.setAttribute('fill', color); svg.appendChild(a);
-  }
-  function mkText(x, y, txt, color) {
-    var t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x', x); t.setAttribute('y', y); t.setAttribute('fill', color);
-    t.setAttribute('font-size','10'); t.setAttribute('font-weight','700');
-    t.setAttribute('font-family','Segoe UI,system-ui,sans-serif');
-    t.textContent = txt; svg.appendChild(t);
+  // Build top-bar navigation dots
+  var nav = document.getElementById('topbar-nav');
+  for (var i = 1; i <= TOTAL; i++) {
+    var dot = document.createElement('button');
+    dot.className = 'topbar-dot' + (i === 1 ? ' active' : '');
+    dot.title = 'Section ' + i;
+    dot.dataset.idx = i;
+    dot.onclick = function() {
+      var sec = document.getElementById('sec-' + this.dataset.idx);
+      if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+    };
+    nav.appendChild(dot);
   }
 
-  var cfg = p('fc-config');
-  var csub = document.getElementById('sf-config-sub');
-  if (cfg && csub) {
-    var arm = csub.querySelector('.sf-sub-arm');
-    if (arm) csub.style.paddingLeft = (cfg.cx - arm.offsetWidth/2 - 2) + 'px';
-  }
+  // Scroll-reveal for .reveal elements
+  var revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
 
-  var exec = p('fc-exec');
-  var results = p('fc-results');
-  var nv = p('fc-needviz');
-  var analyze = p('fc-analyze');
-  var da = p('fc-display');
-  var mq = p('fc-moreq');
-  var eq = p('fc-query');
-
-  var mc = '#8a9bba';
-
-  if (exec && results) {
-    var midY = (exec.b + results.t) / 2;
-    mkLine('M'+exec.cx+' '+exec.b+' L'+exec.cx+' '+midY+' L'+results.cx+' '+midY+' L'+results.cx+' '+results.t, mc, false);
-    mkArrow((results.cx-3)+','+results.t+' '+(results.cx+3)+','+results.t+' '+results.cx+','+(results.t+5), mc);
-  }
-
-  if (nv && analyze) {
-    var midY = (nv.b + analyze.t) / 2;
-    mkLine('M'+nv.cx+' '+nv.b+' L'+nv.cx+' '+midY+' L'+analyze.cx+' '+midY+' L'+analyze.cx+' '+analyze.t, mc, false);
-    mkArrow((analyze.cx-3)+','+analyze.t+' '+(analyze.cx+3)+','+analyze.t+' '+analyze.cx+','+(analyze.t+5), mc);
-    mkText(Math.min(nv.cx, analyze.cx)-20, midY+4, 'Yes', '#10b981');
-  }
-
-  if (da && mq) {
-    var midY = (da.b + mq.t) / 2;
-    mkLine('M'+da.cx+' '+da.b+' L'+da.cx+' '+midY+' L'+mq.cx+' '+midY+' L'+mq.cx+' '+mq.t, mc, false);
-    mkArrow((mq.cx-3)+','+mq.t+' '+(mq.cx+3)+','+mq.t+' '+mq.cx+','+(mq.t+5), mc);
-  }
-
-  if (nv && da) {
-    var leftX = 8;
-    var byY = da.b + 10;
-    mkLine('M'+nv.l+' '+nv.cy+' L'+leftX+' '+nv.cy+' L'+leftX+' '+byY+' L'+da.cx+' '+byY+' L'+da.cx+' '+da.b, 'rgba(239,68,68,0.45)', true);
-    mkArrow((da.cx-3)+','+da.b+' '+(da.cx+3)+','+da.b+' '+da.cx+','+(da.b-5), 'rgba(239,68,68,0.6)');
-    mkText(leftX+2, nv.cy-6, 'No', 'rgba(239,68,68,0.7)');
-  }
-
-  if (mq && eq) {
-    var loopX = wR.width - 10;
-    mkLine('M'+mq.r+' '+mq.cy+' L'+loopX+' '+mq.cy+' L'+loopX+' '+eq.cy+' L'+eq.r+' '+eq.cy, 'rgba(16,185,129,0.45)', true);
-    mkArrow(eq.r+','+(eq.cy-3)+' '+eq.r+','+(eq.cy+3)+' '+(eq.r-5)+','+eq.cy, 'rgba(16,185,129,0.6)');
-    mkText(mq.r+5, mq.cy-6, 'Yes ↻', 'rgba(16,185,129,0.7)');
-  }
-
-}
-
-var slide3FlowActive = false;
-var slide3FlowTimeout = null;
-
-function stopSlide3Flow() {
-  slide3FlowActive = false;
-  clearTimeout(slide3FlowTimeout);
-  var row = document.getElementById('flow-row-3');
-  if (!row) return;
-  row.querySelectorAll('.flow-box').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
-  row.querySelectorAll('.flow-arrow').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
-}
-
-function animateSlide3Flow() {
-  stopSlide3Flow();
-  slide3FlowActive = true;
-  var row = document.getElementById('flow-row-3');
-  if (!row) return;
-
-  var items = [];
-  Array.from(row.children).forEach(function(el) {
-    if (el.classList.contains('flow-box')) items.push({ el: el, type: 'node' });
-    else if (el.classList.contains('flow-arrow')) items.push({ el: el, type: 'arrow' });
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    revealObserver.observe(el);
   });
 
-  var idx = 0;
-  function step() {
-    if (!slide3FlowActive) return;
-    if (idx >= items.length) {
-      slide3FlowTimeout = setTimeout(function() {
-        if (!slide3FlowActive) return;
-        items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
-        idx = 0;
-        slide3FlowTimeout = setTimeout(step, 300);
-      }, 2000);
-      return;
+  // Active dot tracking & section-specific animations
+  var slide3FlowActive = false, slide3FlowTimeout = null;
+  var slide5FlowActive = false, slide5FlowTimeout = null;
+  var settingsFlowActive = false, settingsFlowTimeout = null;
+
+  function stopFlowAnim(rowId, ref) {
+    ref.active = false;
+    clearTimeout(ref.timeout);
+    var row = document.getElementById(rowId);
+    if (!row) return;
+    row.querySelectorAll('.flow-box').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
+    row.querySelectorAll('.flow-arrow').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
+  }
+
+  function startFlowAnim(rowId, ref) {
+    stopFlowAnim(rowId, ref);
+    ref.active = true;
+    var row = document.getElementById(rowId);
+    if (!row) return;
+
+    var items = [];
+    Array.from(row.children).forEach(function(el) {
+      if (el.classList.contains('flow-box')) items.push({ el: el, type: 'node' });
+      else if (el.classList.contains('flow-arrow')) items.push({ el: el, type: 'arrow' });
+    });
+
+    var idx = 0;
+    function step() {
+      if (!ref.active) return;
+      if (idx >= items.length) {
+        ref.timeout = setTimeout(function() {
+          if (!ref.active) return;
+          items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
+          idx = 0;
+          ref.timeout = setTimeout(step, 300);
+        }, 2000);
+        return;
+      }
+      var it = items[idx];
+      it.el.classList.add('tracing');
+      var dur = it.type === 'node' ? 1400 : 500;
+      ref.timeout = setTimeout(function() {
+        if (!ref.active) return;
+        it.el.classList.remove('tracing');
+        it.el.classList.add('traced');
+        idx++;
+        step();
+      }, dur);
     }
-    var it = items[idx];
-    it.el.classList.add('tracing');
-    var dur = it.type === 'node' ? 1400 : 500;
-    slide3FlowTimeout = setTimeout(function() {
-      if (!slide3FlowActive) return;
-      it.el.classList.remove('tracing');
-      it.el.classList.add('traced');
-      idx++;
-      step();
-    }, dur);
+    step();
   }
-  step();
-}
 
-var slide5FlowActive = false;
-var slide5FlowTimeout = null;
+  var flow3Ref = { active: false, timeout: null };
+  var flow5Ref = { active: false, timeout: null };
 
-function stopSlide5Flow() {
-  slide5FlowActive = false;
-  clearTimeout(slide5FlowTimeout);
-  var row = document.getElementById('flow-row-5');
-  if (!row) return;
-  row.querySelectorAll('.flow-box').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
-  row.querySelectorAll('.flow-arrow').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
-}
-
-function animateSlide5Flow() {
-  stopSlide5Flow();
-  slide5FlowActive = true;
-  var row = document.getElementById('flow-row-5');
-  if (!row) return;
-
-  var items = [];
-  Array.from(row.children).forEach(function(el) {
-    if (el.classList.contains('flow-box')) items.push({ el: el, type: 'node' });
-    else if (el.classList.contains('flow-arrow')) items.push({ el: el, type: 'arrow' });
-  });
-
-  var idx = 0;
-  function step() {
-    if (!slide5FlowActive) return;
-    if (idx >= items.length) {
-      slide5FlowTimeout = setTimeout(function() {
-        if (!slide5FlowActive) return;
-        items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
-        idx = 0;
-        slide5FlowTimeout = setTimeout(step, 300);
-      }, 2000);
-      return;
-    }
-    var it = items[idx];
-    it.el.classList.add('tracing');
-    var dur = it.type === 'node' ? 1400 : 500;
-    slide5FlowTimeout = setTimeout(function() {
-      if (!slide5FlowActive) return;
-      it.el.classList.remove('tracing');
-      it.el.classList.add('traced');
-      idx++;
-      step();
-    }, dur);
+  function stopSettingsFlow() {
+    settingsFlowActive = false;
+    clearTimeout(settingsFlowTimeout);
+    var vf = document.querySelector('[data-section="8"] .vflow');
+    if (!vf) return;
+    vf.querySelectorAll('.sf-n').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
+    vf.querySelectorAll('.vflow-ar').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
+    vf.querySelectorAll('.vflow-h').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
   }
-  step();
-}
 
-var settingsFlowActive = false;
-var settingsFlowTimeout = null;
+  function animateSettingsFlow() {
+    stopSettingsFlow();
+    settingsFlowActive = true;
+    var vf = document.querySelector('[data-section="8"] .vflow');
+    if (!vf) return;
 
-function stopSettingsFlow() {
-  settingsFlowActive = false;
-  clearTimeout(settingsFlowTimeout);
-  var vf = document.querySelector('[data-slide="8"] .vflow');
-  if (!vf) return;
-  vf.querySelectorAll('.sf-n').forEach(function(n) { n.classList.remove('tracing', 'traced'); });
-  vf.querySelectorAll('.vflow-ar').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
-  vf.querySelectorAll('.vflow-h').forEach(function(a) { a.classList.remove('tracing', 'traced'); });
-}
+    var items = [];
+    Array.from(vf.children).forEach(function(el) {
+      if (el.classList.contains('sf-n')) items.push({ el: el, type: 'node' });
+      else if (el.classList.contains('vflow-ar')) items.push({ el: el, type: 'arrow' });
+      else if (el.classList.contains('vflow-branch')) {
+        Array.from(el.children).forEach(function(child) {
+          if (child.classList.contains('sf-n')) items.push({ el: child, type: 'node' });
+          else if (child.classList.contains('vflow-h')) items.push({ el: child, type: 'arrow' });
+        });
+      }
+    });
 
-function animateSettingsFlow() {
-  stopSettingsFlow();
-  settingsFlowActive = true;
-  var vf = document.querySelector('[data-slide="8"] .vflow');
-  if (!vf) return;
-
-  var items = [];
-  Array.from(vf.children).forEach(function(el) {
-    if (el.classList.contains('sf-n')) {
-      items.push({ el: el, type: 'node' });
-    } else if (el.classList.contains('vflow-ar')) {
-      items.push({ el: el, type: 'arrow' });
-    } else if (el.classList.contains('vflow-branch')) {
-      Array.from(el.children).forEach(function(child) {
-        if (child.classList.contains('sf-n')) items.push({ el: child, type: 'node' });
-        else if (child.classList.contains('vflow-h')) items.push({ el: child, type: 'arrow' });
-      });
-    }
-  });
-
-  var idx = 0;
-  function step() {
-    if (!settingsFlowActive) return;
-    if (idx >= items.length) {
+    var idx = 0;
+    function step() {
+      if (!settingsFlowActive) return;
+      if (idx >= items.length) {
+        settingsFlowTimeout = setTimeout(function() {
+          if (!settingsFlowActive) return;
+          items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
+          idx = 0;
+          settingsFlowTimeout = setTimeout(step, 300);
+        }, 2000);
+        return;
+      }
+      var it = items[idx];
+      it.el.classList.add('tracing');
+      var dur = it.type === 'node' ? 1400 : 500;
       settingsFlowTimeout = setTimeout(function() {
         if (!settingsFlowActive) return;
-        items.forEach(function(it) { it.el.classList.remove('tracing', 'traced'); });
-        idx = 0;
-        settingsFlowTimeout = setTimeout(step, 300);
-      }, 2000);
-      return;
+        it.el.classList.remove('tracing');
+        it.el.classList.add('traced');
+        idx++;
+        step();
+      }, dur);
     }
-    var it = items[idx];
-    it.el.classList.add('tracing');
-    var dur = it.type === 'node' ? 1400 : 500;
-    settingsFlowTimeout = setTimeout(function() {
-      if (!settingsFlowActive) return;
-      it.el.classList.remove('tracing');
-      it.el.classList.add('traced');
-      idx++;
-      step();
-    }, dur);
+    step();
   }
-  step();
-}
 
-var _origUpdateUI = updateUI;
-updateUI = function() {
-  _origUpdateUI();
-  if (current === 8) setTimeout(animateSettingsFlow, 600);
-  else stopSettingsFlow();
-  if (current === 3) setTimeout(animateSlide3Flow, 600);
-  else stopSlide3Flow();
-  if (current === 5) setTimeout(animateSlide5Flow, 600);
-  else stopSlide5Flow();
-};
-window.addEventListener('resize', function() {});
+  var sectionObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      var idx = e.target.dataset.section;
 
+      if (e.isIntersecting) {
+        // Update active dot
+        document.querySelectorAll('.topbar-dot').forEach(function(d) {
+          d.classList.toggle('active', d.dataset.idx === idx);
+        });
+
+        // Trigger section-specific animations
+        if (idx === '3') startFlowAnim('flow-row-3', flow3Ref);
+        if (idx === '5') startFlowAnim('flow-row-5', flow5Ref);
+        if (idx === '8') setTimeout(animateSettingsFlow, 400);
+        if (idx === '14') e.target.classList.add('in-view');
+      } else {
+        if (idx === '3') stopFlowAnim('flow-row-3', flow3Ref);
+        if (idx === '5') stopFlowAnim('flow-row-5', flow5Ref);
+        if (idx === '8') stopSettingsFlow();
+      }
+    });
+  }, { threshold: 0.35 });
+
+  document.querySelectorAll('.section').forEach(function(sec) {
+    sectionObserver.observe(sec);
+  });
+})();
 </script>
 </body>
 </html>
